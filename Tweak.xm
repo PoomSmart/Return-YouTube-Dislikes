@@ -65,16 +65,16 @@ static void getDislikeFromVideoWithHandler(NSString *videoIdentifier, void (^han
     [[session dataTaskWithURL:dataUrl completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error) {
             handler(nil);
-        } else {
-            NSError *jsonError;
-            NSDictionary *responseObject = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonError];
-            if (jsonError) {
-                handler(nil);
-            } else {
-                NSString *dislikeCount = [NSString stringWithFormat:@"%@", [responseObject objectForKey:@"dislikes"]];
-                handler(dislikeCount);
-            }
+            return;
         }
+        NSError *jsonError;
+        NSDictionary *responseObject = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonError];
+        if (jsonError) {
+            handler(nil);
+            return;
+        }
+        NSString *dislikeCount = [NSString stringWithFormat:@"%@", [responseObject objectForKey:@"dislikes"]];
+        handler(dislikeCount);
     }] resume];
 }
 
