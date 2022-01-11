@@ -168,7 +168,7 @@ static void getDislikeFromVideoWithHandler(NSString *videoIdentifier, int retryC
 %hook YTReelWatchLikesController
 
 - (void)updateLikeButtonWithRenderer:(YTILikeButtonRenderer *)renderer {
-    %orig(renderer);
+    %orig;
     getDislikeFromVideoWithHandler(renderer.target.videoId, maxRetryCount, ^(NSString *dislikeCount) {
         if (dislikeCount) {
             NSString *formattedDislikeCount = getNormalizedDislikes(dislikeCount);
@@ -182,8 +182,18 @@ static void getDislikeFromVideoWithHandler(NSString *videoIdentifier, int retryC
             if (renderer.hasDislikeCountWithUndislikeText) {
                 renderer.dislikeCountWithUndislikeText = formattedText;
             }
+            int likeStatus = renderer.likeStatus;
+            YTQTMButton *dislikeButton = self.dislikeButton;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (likeStatus == 1) {
+                    [dislikeButton setTitle:[renderer.dislikeCountWithUndislikeText stringWithFormattingRemoved] forState:0];
+                    [dislikeButton setTitle:[renderer.dislikeCountText stringWithFormattingRemoved] forState:4];
+                } else {
+                    [dislikeButton setTitle:[renderer.dislikeCountText stringWithFormattingRemoved] forState:0];
+                    [dislikeButton setTitle:[renderer.dislikeCountWithDislikeText stringWithFormattingRemoved] forState:4];
+                }
+            });
         }
-        %orig(renderer);
     });
 }
 
