@@ -4,16 +4,13 @@
 
 #define maxRetryCount 3
 #define apiUrl @"https://returnyoutubedislikeapi.com"
+#define FETCHING @"Fetching"
 
 // enum YTLikeStatus : int {
 //     YTLikeStatusLike = 0,
 //     YTLikeStatusDislike = 1,
 //     YTLikeStatusNeutral = 2
 // };
-
-@interface YTSlimVideoDetailsActionView (RYD)
-@property (nonatomic, assign) NSInteger dislikeCount;
-@end
 
 // static int toRYDLikeStatus(YTLikeStatus likeStatus) {
 //     switch (likeStatus) {
@@ -106,7 +103,7 @@ static void getDislikeFromVideoWithHandler(NSString *videoIdentifier, int retryC
     if (self) {
         YTISlimMetadataButtonSupportedRenderers *renderer = [self valueForKey:@"_supportedRenderer"];
         if ([renderer slimButton_isDislikeButton]) {
-            setDislikeCount(self, @"Fetching");
+            setDislikeCount(self, FETCHING);
             YTISlimMetadataToggleButtonRenderer *meta = renderer.slimMetadataToggleButtonRenderer;
             getDislikeFromVideoWithHandler(meta.target.videoId, maxRetryCount, ^(NSString *dislikeCount) {
                 setDislikeCount(self, getNormalizedDislikes(dislikeCount));
@@ -124,7 +121,7 @@ static void getDislikeFromVideoWithHandler(NSString *videoIdentifier, int retryC
     if (isDislikeButton) {
         changed = self.toggled != toggled;
         YTIToggleButtonRenderer *buttonRenderer = meta.button.toggleButtonRenderer;
-        YTIFormattedString *formattedText = [%c(YTIFormattedString) formattedStringWithString:@"Fetching"];
+        YTIFormattedString *formattedText = [%c(YTIFormattedString) formattedStringWithString:FETCHING];
         buttonRenderer.toggledText = formattedText;
         buttonRenderer.defaultText = formattedText;
     }
@@ -169,6 +166,9 @@ static void getDislikeFromVideoWithHandler(NSString *videoIdentifier, int retryC
 
 - (void)updateLikeButtonWithRenderer:(YTILikeButtonRenderer *)renderer {
     %orig;
+    YTQTMButton *dislikeButton = self.dislikeButton;
+    [dislikeButton setTitle:FETCHING forState:UIControlStateNormal];
+    [dislikeButton setTitle:FETCHING forState:UIControlStateSelected];
     getDislikeFromVideoWithHandler(renderer.target.videoId, maxRetryCount, ^(NSString *dislikeCount) {
         if (dislikeCount) {
             NSString *formattedDislikeCount = getNormalizedDislikes(dislikeCount);
@@ -183,14 +183,13 @@ static void getDislikeFromVideoWithHandler(NSString *videoIdentifier, int retryC
                 renderer.dislikeCountWithUndislikeText = formattedText;
             }
             int likeStatus = renderer.likeStatus;
-            YTQTMButton *dislikeButton = self.dislikeButton;
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (likeStatus == 1) {
-                    [dislikeButton setTitle:[renderer.dislikeCountWithUndislikeText stringWithFormattingRemoved] forState:0];
-                    [dislikeButton setTitle:[renderer.dislikeCountText stringWithFormattingRemoved] forState:4];
+                    [dislikeButton setTitle:[renderer.dislikeCountWithUndislikeText stringWithFormattingRemoved] forState:UIControlStateNormal];
+                    [dislikeButton setTitle:[renderer.dislikeCountText stringWithFormattingRemoved] forState:UIControlStateSelected];
                 } else {
-                    [dislikeButton setTitle:[renderer.dislikeCountText stringWithFormattingRemoved] forState:0];
-                    [dislikeButton setTitle:[renderer.dislikeCountWithDislikeText stringWithFormattingRemoved] forState:4];
+                    [dislikeButton setTitle:[renderer.dislikeCountText stringWithFormattingRemoved] forState:UIControlStateNormal];
+                    [dislikeButton setTitle:[renderer.dislikeCountWithDislikeText stringWithFormattingRemoved] forState:UIControlStateSelected];
                 }
             });
         }
