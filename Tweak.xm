@@ -6,6 +6,8 @@
 #define apiUrl @"https://returnyoutubedislikeapi.com"
 #define FETCHING @"Fetching"
 
+static NSCache <NSString *, NSString *> *cache;
+
 // enum YTLikeStatus : int {
 //     YTLikeStatusLike = 0,
 //     YTLikeStatusDislike = 1,
@@ -63,6 +65,10 @@ static void getDislikeFromVideoWithHandler(NSString *videoIdentifier, int retryC
     if (retryCount <= 0) {
         return;
     }
+    if ([cache objectForKey:videoIdentifier]) {
+        handler([cache objectForKey:videoIdentifier], YES);
+        return;
+    }
     NSURL *dataUrl = [NSURL URLWithString:[NSString stringWithFormat:@"%@/votes?videoId=%@", apiUrl, videoIdentifier]];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
     [[session dataTaskWithURL:dataUrl completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
@@ -98,6 +104,7 @@ static void getDislikeFromVideoWithHandler(NSString *videoIdentifier, int retryC
             return;
         }
         NSString *dislikeCount = [NSString stringWithFormat:@"%@", [responseObject objectForKey:@"dislikes"]];
+        [cache setObject:dislikeCount forKey:videoIdentifier];
         handler(dislikeCount, YES);
     }] resume];
 }
@@ -214,3 +221,7 @@ static void getDislikeFromVideoWithHandler(NSString *videoIdentifier, int retryC
 // }
 
 %end
+
+%ctor {
+    cache = [NSCache new];
+}
