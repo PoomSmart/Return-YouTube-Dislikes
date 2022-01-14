@@ -116,7 +116,6 @@ static void getDislikeFromVideoWithHandler(NSString *videoIdentifier, int retryC
     if (self) {
         YTISlimMetadataButtonSupportedRenderers *renderer = [self valueForKey:@"_supportedRenderer"];
         if ([renderer slimButton_isDislikeButton]) {
-            setDislikeCount(self, FETCHING);
             YTISlimMetadataToggleButtonRenderer *meta = renderer.slimMetadataToggleButtonRenderer;
             getDislikeFromVideoWithHandler(meta.target.videoId, maxRetryCount, ^(NSString *dislikeCount, BOOL isNumber) {
                 setDislikeCount(self, getNormalizedDislikes(dislikeCount, isNumber));
