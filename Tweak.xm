@@ -215,6 +215,10 @@ static void registerUser() {
                 @"POST",
                 @{ @"solution": solution },
                 ^(NSDictionary *data) {
+                    if ([data isKindOfClass:[NSNumber class]] && ![(NSNumber *)data boolValue]) {
+                        HBLogInfo(@"registerUser() failed");
+                        return;
+                    }
                     if (!isRegistered()) {
                         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:RegistrationConfirmedKey];
                         [[NSUserDefaults standardUserDefaults] synchronize];
