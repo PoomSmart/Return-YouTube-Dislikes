@@ -111,8 +111,8 @@ static void fetch(
     NSDictionary *body,
     void (^dataHandler)(NSDictionary *data),
     BOOL (^responseCodeHandler)(NSUInteger responseCode),
-    void (^networkErrorHandler)(),
-    void (^dataErrorHandler)()
+    void (^networkErrorHandler)(void),
+    void (^dataErrorHandler)(void)
 ) {
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@", apiUrl, endpoint]];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
@@ -186,6 +186,7 @@ static NSString *solvePuzzle(NSDictionary *data) {
             NSString *s = [[NSString alloc] initWithBytes:chars length:4 encoding:NSASCIIStringEncoding];
             solution = btoa(s);
             HBLogDebug(@"solvePuzzle() success (%@)", solution);
+            break;
         }
     }
     free(buffer);
