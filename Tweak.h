@@ -1,6 +1,4 @@
-#import "../YouTubeHeader/YTSlimVideoScrollableDetailsActionsView.h"
 #import "../YouTubeHeader/YTSlimVideoScrollableActionBarCellController.h"
-#import "../YouTubeHeader/YTSlimVideoMetadataExpandingBehavior.h"
 #import "../YouTubeHeader/YTIFormattedStringLabel.h"
 #import "../YouTubeHeader/YTQTMButton.h"
 #import "../YouTubeHeader/YTIToggleButtonRenderer.h"
