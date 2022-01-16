@@ -182,7 +182,7 @@ static NSString *solvePuzzle(NSDictionary *data) {
         uint8_t hash[CC_SHA512_DIGEST_LENGTH] = {0};
         CC_SHA512(buffer, 20, hash);
         if (countLeadingZeroes(hash) >= difficulty) {
-            unichar chars[4] = { buffer[0], buffer[1], buffer[2], buffer[3] };
+            char chars[4] = { buffer[0], buffer[1], buffer[2], buffer[3] };
             NSString *s = [[NSString alloc] initWithBytes:chars length:4 encoding:NSASCIIStringEncoding];
             solution = btoa(s);
             HBLogDebug(@"solvePuzzle() success (%@)", solution);
