@@ -7,6 +7,6 @@
 #import "../YouTubeHeader/YTIButtonSupportedRenderers.h"
 #import "../YouTubeHeader/YTSlimVideoDetailsActionView.h"
 #import "../YouTubeHeader/YTISlimMetadataButtonSupportedRenderers.h"
-#import "../YouTubeHeader/YTLocalPlaybackController.h"
 #import "../YouTubeHeader/YTILikeTarget.h"
 #import "../YouTubeHeader/YTILikeButtonRenderer.h"
+#import "../YouTubeHeader/YTReelWatchLikesController.h"
