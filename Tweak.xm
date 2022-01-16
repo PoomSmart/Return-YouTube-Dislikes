@@ -75,19 +75,23 @@ static void getDislikeFromVideoWithHandler(NSString *videoIdentifier, int retryC
         NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse *)response;
         NSUInteger responseCode = [httpResponse statusCode];
         if (responseCode == 502 || responseCode == 503) {
-            handler(@"CON", NO);
+            handler(@"CON", NO); // connection error
+            return;
+        }
+        if (responseCode == 401 || responseCode == 403 || responseCode == 407) {
+            handler("UNAUTH", NO); // unauthorized
             return;
         }
         if (responseCode == 429) {
-            handler(@"RL", NO);
+            handler(@"RL", NO); // rate limit
             return;
         }
         if (responseCode == 404) {
-            handler(@"NULL", NO);
+            handler(@"NULL", NO); // non-existing video
             return;
         }
         if (responseCode == 400) {
-            handler(@"INV", NO);
+            handler(@"INV", NO); // malformed video
             return;
         }
         if (error) {
