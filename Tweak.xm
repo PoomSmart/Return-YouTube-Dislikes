@@ -242,8 +242,8 @@ static void sendVote(NSString *videoId, YTLikeStatus s) {
         registerUser();
         return;
     }
-    HBLogDebug(@"sendVote(%@, %d)", videoId, s);
     int likeStatus = toRYDLikeStatus(s);
+    HBLogDebug(@"sendVote(%@, %d)", videoId, likeStatus);
     fetch(
         @"/interact/vote",
         @"POST",
@@ -281,16 +281,21 @@ static void sendVote(NSString *videoId, YTLikeStatus s) {
         ^BOOL(NSUInteger responseCode) {
             if (responseCode == 401) {
                 HBLogDebug(@"sendVote() error 401, trying again");
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                    registerUser();
-                    sendVote(videoId, s);
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                        sendVote(videoId, s);
+                    });
                 });
                 return NO;
             }
             return YES;
         },
-        NULL,
-        NULL
+        ^() {
+            HBLogDebug(@"sendVote() failed (network)");
+        },
+        ^() {
+            HBLogDebug(@"sendVote() failed (data)");
+        }
     );
 }
 
