@@ -190,7 +190,9 @@ static NSString *solvePuzzle(NSDictionary *data) {
         }
     }
     free(buffer);
-    HBLogDebug(@"solvePuzzle() failed");
+    if (!solution) {
+        HBLogDebug(@"solvePuzzle() failed");
+    }
     return solution;
 }
 
