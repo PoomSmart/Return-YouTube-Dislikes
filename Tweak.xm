@@ -134,14 +134,15 @@ static void fetch(
         [urlRequest setValue:@"application/json" forHTTPHeaderField:@"Accept"];
     }
     [[session dataTaskWithRequest:urlRequest completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+        NSUInteger responseCode = [httpResponse statusCode];
         if (responseCodeHandler) {
-            NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
-            NSUInteger responseCode = [httpResponse statusCode];
             if (!responseCodeHandler(responseCode)) {
                 return;
             }
         }
-        if (error) {
+        if (error || responseCode != 200) {
+            HBLogDebug(@"fetch() error requesting: %@ (%lu)", error, responseCode);
             if (networkErrorHandler) {
                 networkErrorHandler();
             }
