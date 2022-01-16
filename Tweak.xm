@@ -45,7 +45,7 @@ static NSString *generateUserID() {
     static const char *charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     char userID[36 + 1];
     for (int i = 0; i < 36; ++i) {
-        userID[i] = charset[arc4random_uniform(36)];
+        userID[i] = charset[arc4random_uniform(63)];
     }
     userID[36] = '\0';
     NSString *result = [NSString stringWithUTF8String:userID];
