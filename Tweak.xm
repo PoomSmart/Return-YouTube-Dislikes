@@ -418,33 +418,41 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
     return self;
 }
 
-- (void)setToggled:(BOOL)toggled {
+- (void)didTapButton:(id)arg1 {
+    BOOL toggled = !self.toggled;
+    %orig;
     YTISlimMetadataButtonSupportedRenderers *renderer = [self valueForKey:@"_supportedRenderer"];
     BOOL isLikeButton = [renderer slimButton_isLikeButton];
     BOOL isDislikeButton = [renderer slimButton_isDislikeButton];
     YTISlimMetadataToggleButtonRenderer *meta = renderer.slimMetadataToggleButtonRenderer;
     NSString *videoId = meta.target.videoId;
+    if (isLikeButton) {
+        sendVote(videoId, toggled ? YTLikeStatusLike : YTLikeStatusNeutral);
+    } else if (isDislikeButton) {
+        sendVote(videoId, toggled ? YTLikeStatusDislike : YTLikeStatusNeutral);
+    }
+}
+
+- (void)setToggled:(BOOL)toggled {
+    YTISlimMetadataButtonSupportedRenderers *renderer = [self valueForKey:@"_supportedRenderer"];
+    BOOL isDislikeButton = [renderer slimButton_isDislikeButton];
+    YTISlimMetadataToggleButtonRenderer *meta = renderer.slimMetadataToggleButtonRenderer;
     BOOL changed = NO;
-    changed = self.toggled != toggled;
     if (isDislikeButton) {
+        changed = self.toggled != toggled;
         YTIToggleButtonRenderer *buttonRenderer = meta.button.toggleButtonRenderer;
         YTIFormattedString *formattedText = [%c(YTIFormattedString) formattedStringWithString:FETCHING];
         buttonRenderer.toggledText = formattedText;
         buttonRenderer.defaultText = formattedText;
     }
     %orig;
-    if (changed) {
-        if (isDislikeButton) {
-            sendVote(videoId, toggled ? YTLikeStatusDislike : YTLikeStatusNeutral);
-            getDislikeFromVideoWithHandler(videoId, maxRetryCount, ^(NSString *dislikeCount, BOOL isNumber) {
-                NSString *response = getNormalizedDislikes(dislikeCount, isNumber);
-                YTIFormattedString *formattedText = [%c(YTIFormattedString) formattedStringWithString:response];
-                [self.label setFormattedString:formattedText];
-                [self setNeedsLayout];
-            });
-        } else if (isLikeButton) {
-            sendVote(videoId, toggled ? YTLikeStatusLike : YTLikeStatusNeutral);
-        }
+    if (changed && isDislikeButton) {
+        getDislikeFromVideoWithHandler(meta.target.videoId, maxRetryCount, ^(NSString *dislikeCount, BOOL isNumber) {
+            NSString *response = getNormalizedDislikes(dislikeCount, isNumber);
+            YTIFormattedString *formattedText = [%c(YTIFormattedString) formattedStringWithString:response];
+            [self.label setFormattedString:formattedText];
+            [self setNeedsLayout];
+        });
     }
 }
 
