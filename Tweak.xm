@@ -7,6 +7,7 @@
 #define apiUrl @"https://returnyoutubedislikeapi.com"
 #define UserIDKey @"RYD-USER-ID"
 #define RegistrationConfirmedKey @"RYD-USER-REGISTERED"
+#define EnableVoteSubmissionKey @"RYD-VOTE-SUBMISSION"
 #define FETCHING @"Fetching"
 
 static NSCache <NSString *, NSString *> *cache;
@@ -34,6 +35,10 @@ static NSString *getUserID() {
 
 static BOOL isRegistered() {
     return [[NSUserDefaults standardUserDefaults] boolForKey:RegistrationConfirmedKey];
+}
+
+static BOOL VoteSubmissionEnabled() {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:EnableVoteSubmissionKey];
 }
 
 static NSString *generateUserID() {
@@ -339,7 +344,7 @@ static NSString *getNormalizedDislikes(NSString *dislikeCount, BOOL isNumber) {
 static void setDislikeCount(YTSlimVideoDetailsActionView *self, NSString *dislikeCount) {
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.label setFormattedString:[%c(YTIFormattedString) formattedStringWithString:dislikeCount]];
-        [self.label sizeToFit];
+        [self setNeedsLayout];
     });
 }
 
@@ -421,6 +426,9 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
 - (void)didTapButton:(id)arg1 {
     BOOL toggled = !self.toggled;
     %orig;
+    if (!VoteSubmissionEnabled()) {
+        return;
+    }
     YTISlimMetadataButtonSupportedRenderers *renderer = [self valueForKey:@"_supportedRenderer"];
     BOOL isLikeButton = [renderer slimButton_isLikeButton];
     BOOL isDislikeButton = [renderer slimButton_isDislikeButton];
@@ -462,6 +470,9 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
 
 - (void)updateLikeButtonWithRenderer:(YTILikeButtonRenderer *)renderer {
     %orig;
+    if (!VoteSubmissionEnabled()) {
+        return;
+    }
     YTQTMButton *dislikeButton = self.dislikeButton;
     [dislikeButton setTitle:FETCHING forState:UIControlStateNormal];
     [dislikeButton setTitle:FETCHING forState:UIControlStateSelected];
@@ -495,6 +506,31 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
 - (void)triggerServiceEndpointForLikeButtonRenderer:(YTILikeButtonRenderer *)renderer forRequestID:(id)requestID withLikeStatus:(YTLikeStatus)likeStatus {
     sendVote(renderer.target.videoId, likeStatus);
     %orig;
+}
+
+%end
+
+%hook YTSettingsViewController
+
+- (void)setSectionItems:(NSMutableArray <YTSettingsSectionItem *> *)sectionItems forCategory:(NSInteger)category title:(NSString *)title titleDescription:(NSString *)titleDescription headerHidden:(BOOL)headerHidden {
+    if (category == 1) {
+        NSUInteger statsForNerdsIndex = [sectionItems indexOfObjectPassingTest:^BOOL (YTSettingsSectionItem *item, NSUInteger idx, BOOL *stop) { 
+            return item.settingItemId == 265;
+        }];
+        if (statsForNerdsIndex != NSNotFound) {
+            YTSettingsSectionItem *vote = [%c(YTSettingsSectionItem) switchItemWithTitle:@"Enable vote submission"
+                titleDescription:@"Allow your videos/shorts likes/dislikes data to be submited to returnyoutubedislike.com"
+                accessibilityIdentifier:nil
+                switchOn:VoteSubmissionEnabled()
+                switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
+                    [[NSUserDefaults standardUserDefaults] setBool:enabled forKey:EnableVoteSubmissionKey];
+                    return YES;
+                }
+                settingItemId:0];
+            [sectionItems insertObject:vote atIndex:statsForNerdsIndex + 1];
+        }
+    }
+    %orig(sectionItems, category, title, titleDescription, headerHidden);
 }
 
 %end

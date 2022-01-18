@@ -6,3 +6,5 @@
 #import "../YouTubeHeader/YTISlimMetadataButtonSupportedRenderers.h"
 #import "../YouTubeHeader/YTILikeButtonRenderer.h"
 #import "../YouTubeHeader/YTReelWatchLikesController.h"
+#import "../YouTubeHeader/YTSettingsCell.h"
+#import "../YouTubeHeader/YTSettingsSectionItem.h"
