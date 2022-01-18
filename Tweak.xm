@@ -55,11 +55,11 @@ static NSString *generateUserID() {
     return result;
 }
 
-static int countLeadingZeroes(uint8_t *uInt8View) {
+static int countLeadingZeroes(uint8_t *hash) {
     int zeroes = 0;
     int value = 0;
     for (int i = 0; i < CC_SHA512_DIGEST_LENGTH; i++) {
-        value = uInt8View[i];
+        value = hash[i];
         if (value == 0) {
             zeroes += 8;
         } else {
