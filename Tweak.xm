@@ -294,8 +294,9 @@ static void sendVote(NSString *videoId, YTLikeStatus s) {
         ^BOOL(NSUInteger responseCode) {
             if (responseCode == 401) {
                 HBLogDebug(@"sendVote() error 401, trying again");
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                    registerUser();
+                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                         sendVote(videoId, s);
                     });
                 });
@@ -326,7 +327,7 @@ static NSString *getNormalizedDislikes(NSString *dislikeCount, BOOL isNumber) {
         return @"Failed";
     }
     NSUInteger digits = dislikeCount.length;
-    if (digits <= 3 || !isNumber) { // 0 - 999
+    if (digits <= 3 || !isNumber) { // 0 - 999 or non-number
         return dislikeCount;
     }
     if (digits == 4) { // 1000 - 9999
@@ -504,7 +505,9 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
 }
 
 - (void)triggerServiceEndpointForLikeButtonRenderer:(YTILikeButtonRenderer *)renderer forRequestID:(id)requestID withLikeStatus:(YTLikeStatus)likeStatus {
-    sendVote(renderer.target.videoId, likeStatus);
+    if (VoteSubmissionEnabled()) {
+        sendVote(renderer.target.videoId, likeStatus);
+    }
     %orig;
 }
 
