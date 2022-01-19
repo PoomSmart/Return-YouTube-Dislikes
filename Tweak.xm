@@ -79,7 +79,7 @@ static void getDislikeFromVideoWithHandler(NSString *videoIdentifier, int retryC
             return;
         }
         if (responseCode == 401 || responseCode == 403 || responseCode == 407) {
-            handler("UNAUTH", NO); // unauthorized
+            handler(@"UNAUTH", NO); // unauthorized
             return;
         }
         if (responseCode == 429) {
