@@ -41,6 +41,7 @@ static BOOL VoteSubmissionEnabled() {
     return [[NSUserDefaults standardUserDefaults] boolForKey:EnableVoteSubmissionKey];
 }
 
+// Ported to objc from RYD extension
 static NSString *generateUserID() {
     NSString *existingID = getUserID();
     if (existingID) {
@@ -60,6 +61,7 @@ static NSString *generateUserID() {
     return result;
 }
 
+// Ported to objc from RYD extension
 static int countLeadingZeroes(uint8_t *hash) {
     int zeroes = 0;
     int value = 0;
@@ -84,20 +86,24 @@ static int countLeadingZeroes(uint8_t *hash) {
     return zeroes;
 }
 
+// Ported to objc from RYD extension
 static NSString *btoa(NSString *input) {
     static const char *chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     NSMutableString *output = [NSMutableString string];
     for (int i = 0; i < input.length; i += 3) {
         int groupsOfSix[4] = { -1, -1, -1, -1 };
-        groupsOfSix[0] = [input characterAtIndex:i] >> 2;
-        groupsOfSix[1] = ([input characterAtIndex:i] & 0x03) << 4;
+        unichar ci = [input characterAtIndex:i];
+        groupsOfSix[0] = ci >> 2;
+        groupsOfSix[1] = (ci & 0x03) << 4;
         if (input.length > i + 1) {
-            groupsOfSix[1] |= [input characterAtIndex:i + 1] >> 4;
-            groupsOfSix[2] = ([input characterAtIndex:i + 1] & 0x0f) << 2;
+            unichar ci1 = [input characterAtIndex:i + 1];
+            groupsOfSix[1] |= ci1 >> 4;
+            groupsOfSix[2] = (ci1 & 0x0f) << 2;
         }
         if (input.length > i + 2) {
-            groupsOfSix[2] |= [input characterAtIndex:i + 2] >> 6;
-            groupsOfSix[3] = [input characterAtIndex:i + 2] & 0x3f;
+            unichar ci2 = [input characterAtIndex:i + 2];
+            groupsOfSix[2] |= ci2 >> 6;
+            groupsOfSix[3] = ci2 & 0x3f;
         }
         for (int j = 0; j < 4; ++j) {
             if (groupsOfSix[j] == -1) {
@@ -166,6 +172,7 @@ static void fetch(
     }] resume];
 }
 
+// Ported to objc from RYD extension
 static NSString *solvePuzzle(NSDictionary *data) {
     NSString *solution = nil;
     NSString *challenge = data[@"challenge"];
@@ -178,7 +185,7 @@ static NSString *solvePuzzle(NSDictionary *data) {
     for (int i = 0; i < decoded.length; ++i) {
         c[i] = [decoded characterAtIndex:i];
     }
-    int maxCount = pow(2, difficulty) * 5;
+    int maxCount = (1 << difficulty) * 5;
     for (int i = 4; i < 20; ++i) {
         buffer[i] = c[i - 4];
     }
@@ -201,6 +208,7 @@ static NSString *solvePuzzle(NSDictionary *data) {
     return solution;
 }
 
+// Ported to objc from RYD extension
 static void registerUser() {
     NSString *userId = generateUserID();
     HBLogDebug(@"registerUser() (%@)", userId);
@@ -249,6 +257,7 @@ static void registerUser() {
     );
 }
 
+// Ported to objc from RYD extension
 static void sendVote(NSString *videoId, YTLikeStatus s) {
     NSString *userId = getUserID();
     if (!userId || !isRegistered()) {
@@ -522,11 +531,13 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
         }];
         if (statsForNerdsIndex != NSNotFound) {
             YTSettingsSectionItem *vote = [%c(YTSettingsSectionItem) switchItemWithTitle:@"Enable vote submission"
-                titleDescription:@"Allow your videos/shorts likes/dislikes data to be submited to returnyoutubedislike.com"
+                titleDescription:@"Allow your videos/shorts likes/dislikes data to be submitted to returnyoutubedislikeapi.com"
                 accessibilityIdentifier:nil
                 switchOn:VoteSubmissionEnabled()
                 switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
-                    [[NSUserDefaults standardUserDefaults] setBool:enabled forKey:EnableVoteSubmissionKey];
+                    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+                    [defaults setBool:enabled forKey:EnableVoteSubmissionKey];
+                    [defaults synchronize];
                     return YES;
                 }
                 settingItemId:0];
