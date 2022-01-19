@@ -531,7 +531,7 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
         }];
         if (statsForNerdsIndex != NSNotFound) {
             YTSettingsSectionItem *vote = [%c(YTSettingsSectionItem) switchItemWithTitle:@"Enable vote submission"
-                titleDescription:@"Allow your videos/shorts likes/dislikes data to be submitted to returnyoutubedislikeapi.com"
+                titleDescription:@"Allow your unique anonymous ID and videos/shorts likes/dislikes data to be submitted to returnyoutubedislikeapi.com"
                 accessibilityIdentifier:nil
                 switchOn:VoteSubmissionEnabled()
                 switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
