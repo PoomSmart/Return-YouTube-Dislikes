@@ -41,7 +41,7 @@ static BOOL VoteSubmissionEnabled() {
     return [[NSUserDefaults standardUserDefaults] boolForKey:EnableVoteSubmissionKey];
 }
 
-// Ported to objc from RYD extension
+// Ported to objc from RYD browser extension
 static NSString *generateUserID() {
     NSString *existingID = getUserID();
     if (existingID) {
@@ -61,7 +61,7 @@ static NSString *generateUserID() {
     return result;
 }
 
-// Ported to objc from RYD extension
+// Ported to objc from RYD browser extension
 static int countLeadingZeroes(uint8_t *hash) {
     int zeroes = 0;
     int value = 0;
@@ -86,7 +86,7 @@ static int countLeadingZeroes(uint8_t *hash) {
     return zeroes;
 }
 
-// Ported to objc from RYD extension
+// Ported to objc from RYD browser extension
 static NSString *btoa(NSString *input) {
     static const char *chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     NSMutableString *output = [NSMutableString string];
@@ -172,7 +172,7 @@ static void fetch(
     }] resume];
 }
 
-// Ported to objc from RYD extension
+// Ported to objc from RYD browser extension
 static NSString *solvePuzzle(NSDictionary *data) {
     NSString *solution = nil;
     NSString *challenge = data[@"challenge"];
@@ -208,7 +208,7 @@ static NSString *solvePuzzle(NSDictionary *data) {
     return solution;
 }
 
-// Ported to objc from RYD extension
+// Ported to objc from RYD browser extension
 static void registerUser() {
     NSString *userId = generateUserID();
     HBLogDebug(@"registerUser() (%@)", userId);
@@ -257,7 +257,7 @@ static void registerUser() {
     );
 }
 
-// Ported to objc from RYD extension
+// Ported to objc from RYD browser extension
 static void sendVote(NSString *videoId, YTLikeStatus s) {
     NSString *userId = getUserID();
     if (!userId || !isRegistered()) {
