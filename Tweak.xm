@@ -480,9 +480,6 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
 
 - (void)updateLikeButtonWithRenderer:(YTILikeButtonRenderer *)renderer {
     %orig;
-    if (!VoteSubmissionEnabled()) {
-        return;
-    }
     YTQTMButton *dislikeButton = self.dislikeButton;
     [dislikeButton setTitle:FETCHING forState:UIControlStateNormal];
     [dislikeButton setTitle:FETCHING forState:UIControlStateSelected];
