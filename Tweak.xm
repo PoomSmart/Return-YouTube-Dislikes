@@ -483,6 +483,7 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
     YTQTMButton *dislikeButton = self.dislikeButton;
     [dislikeButton setTitle:FETCHING forState:UIControlStateNormal];
     [dislikeButton setTitle:FETCHING forState:UIControlStateSelected];
+    int likeStatus = renderer.likeStatus;
     getDislikeFromVideoWithHandler(renderer.target.videoId, maxRetryCount, ^(NSString *dislikeCount, BOOL isNumber) {
         if (dislikeCount) {
             NSString *formattedDislikeCount = getNormalizedDislikes(dislikeCount, isNumber);
@@ -496,7 +497,6 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
             if (renderer.hasDislikeCountWithUndislikeText) {
                 renderer.dislikeCountWithUndislikeText = formattedText;
             }
-            int likeStatus = renderer.likeStatus;
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (likeStatus == 1) {
                     [dislikeButton setTitle:[renderer.dislikeCountWithUndislikeText stringWithFormattingRemoved] forState:UIControlStateNormal];
