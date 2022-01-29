@@ -9,8 +9,9 @@
 #define RegistrationConfirmedKey @"RYD-USER-REGISTERED"
 #define EnableVoteSubmissionKey @"RYD-VOTE-SUBMISSION"
 #define FETCHING @"Fetching"
+#define FAILED @"Failed"
 
-static NSCache <NSString *, NSString *> *cache;
+static NSCache <NSString *, NSNumber *> *cache;
 
 enum YTLikeStatus : int {
     YTLikeStatusLike = 0,
@@ -41,6 +42,8 @@ static BOOL VoteSubmissionEnabled() {
     return [[NSUserDefaults standardUserDefaults] boolForKey:EnableVoteSubmissionKey];
 }
 
+static const char *charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
 // Ported to objc from RYD browser extension
 static NSString *generateUserID() {
     NSString *existingID = getUserID();
@@ -48,7 +51,6 @@ static NSString *generateUserID() {
         return existingID;
     }
     HBLogDebug(@"generateUserID()");
-    static const char *charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     char userID[36 + 1];
     for (int i = 0; i < 36; ++i) {
         userID[i] = charset[arc4random_uniform(64)];
@@ -88,7 +90,6 @@ static int countLeadingZeroes(uint8_t *hash) {
 
 // Ported to objc from RYD browser extension
 static NSString *btoa(NSString *input) {
-    static const char *chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     NSMutableString *output = [NSMutableString string];
     for (int i = 0; i < input.length; i += 3) {
         int groupsOfSix[4] = { -1, -1, -1, -1 };
@@ -109,7 +110,7 @@ static NSString *btoa(NSString *input) {
             if (groupsOfSix[j] == -1) {
                 [output appendString:@"="];
             } else {
-                [output appendFormat:@"%c", chars[groupsOfSix[j]]];
+                [output appendFormat:@"%c", charset[groupsOfSix[j]]];
             }
         }
     }
@@ -331,12 +332,16 @@ static NSString *getXPointYFormat(NSString *count, char c) {
     return [NSString stringWithFormat:@"%c.%c%c", firstInt, secondInt, c];
 }
 
-static NSString *getNormalizedDislikes(NSString *dislikeCount, BOOL isNumber) {
-    if (!dislikeCount) {
-        return @"Failed";
+static NSString *getNormalizedDislikes(NSNumber *dislikeNumber, NSString *error) {
+    if (!dislikeNumber) {
+        return FAILED;
     }
+    if (error) {
+        return error;
+    }
+    NSString *dislikeCount = [dislikeNumber stringValue];
     NSUInteger digits = dislikeCount.length;
-    if (digits <= 3 || !isNumber) { // 0 - 999 or non-number
+    if (digits <= 3) { // 0 - 999
         return dislikeCount;
     }
     if (digits == 4) { // 1000 - 9999
@@ -351,19 +356,12 @@ static NSString *getNormalizedDislikes(NSString *dislikeCount, BOOL isNumber) {
     return [NSString stringWithFormat:@"%@B", [dislikeCount substringToIndex:digits - 9]]; // 1_000_000_000+
 }
 
-static void setDislikeCount(YTSlimVideoDetailsActionView *self, NSString *dislikeCount) {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self.label setFormattedString:[%c(YTIFormattedString) formattedStringWithString:dislikeCount]];
-        [self setNeedsLayout];
-    });
-}
-
-static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, void (^handler)(NSString *dislikeCount, BOOL isNumber)) {
+static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, void (^handler)(NSNumber *dislikeCount, NSString *error)) {
     if (retryCount <= 0) {
         return;
     }
     if ([cache objectForKey:videoId]) {
-        handler([cache objectForKey:videoId], YES);
+        handler([cache objectForKey:videoId], nil);
         return;
     }
     fetch(
@@ -371,41 +369,41 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
         @"GET",
         nil,
         ^(NSDictionary *data) {
-            NSString *dislikeCount = [NSString stringWithFormat:@"%@", [data objectForKey:@"dislikes"]];
-            [cache setObject:dislikeCount forKey:videoId];
-            handler(dislikeCount, YES);
+            NSNumber *dislikeNumber = data[@"dislikes"];
+            [cache setObject:dislikeNumber forKey:videoId];
+            handler(dislikeNumber, nil);
         },
         ^BOOL(NSUInteger responseCode) {
             if (responseCode == 502 || responseCode == 503) {
-                handler(@"CON", NO); // connection error
+                handler(nil, @"CON"); // connection error
                 return NO;
             }
             if (responseCode == 401 || responseCode == 403 || responseCode == 407) {
-                handler(@"AUTH", NO); // unauthorized
+                handler(nil, @"AUTH"); // unauthorized
                 return NO;
             }
             if (responseCode == 429) {
-                handler(@"RL", NO); // rate limit
+                handler(nil, @"RL"); // rate limit
                 return NO;
             }
             if (responseCode == 404) {
-                handler(@"NULL", NO); // non-existing video
+                handler(nil, @"NULL"); // non-existing video
                 return NO;
             }
             if (responseCode == 400) {
-                handler(@"INV", NO); // malformed video
+                handler(nil, @"INV"); // malformed video
                 return NO;
             }
             return YES;
         },
         ^() {
-            handler(nil, NO);
+            handler(nil, FAILED);
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 getDislikeFromVideoWithHandler(videoId, retryCount - 1, handler);
             });
         },
         ^() {
-            handler(nil, NO);
+            handler(nil, FAILED);
         }
     );
 }
@@ -425,50 +423,39 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
         YTISlimMetadataButtonSupportedRenderers *renderer = [self valueForKey:@"_supportedRenderer"];
         if ([renderer slimButton_isDislikeButton]) {
             YTISlimMetadataToggleButtonRenderer *meta = renderer.slimMetadataToggleButtonRenderer;
-            getDislikeFromVideoWithHandler(meta.target.videoId, maxRetryCount, ^(NSString *dislikeCount, BOOL isNumber) {
-                setDislikeCount(self, getNormalizedDislikes(dislikeCount, isNumber));
+            getDislikeFromVideoWithHandler(meta.target.videoId, maxRetryCount, ^(NSNumber *dislikeNumber, NSString *error) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self.label setFormattedString:[%c(YTIFormattedString) formattedStringWithString:getNormalizedDislikes(dislikeNumber, error)]];
+                    [self setNeedsLayout];
+                });
             });
         }
     }
     return self;
 }
 
-- (void)didTapButton:(id)arg1 {
-    BOOL toggled = !self.toggled;
-    %orig;
-    if (!VoteSubmissionEnabled()) {
-        return;
-    }
-    YTISlimMetadataButtonSupportedRenderers *renderer = [self valueForKey:@"_supportedRenderer"];
-    BOOL isLikeButton = [renderer slimButton_isLikeButton];
-    BOOL isDislikeButton = [renderer slimButton_isDislikeButton];
-    YTISlimMetadataToggleButtonRenderer *meta = renderer.slimMetadataToggleButtonRenderer;
-    NSString *videoId = meta.target.videoId;
-    if (isLikeButton) {
-        sendVote(videoId, toggled ? YTLikeStatusLike : YTLikeStatusNeutral);
-    } else if (isDislikeButton) {
-        sendVote(videoId, toggled ? YTLikeStatusDislike : YTLikeStatusNeutral);
-    }
-}
-
 - (void)setToggled:(BOOL)toggled {
     YTISlimMetadataButtonSupportedRenderers *renderer = [self valueForKey:@"_supportedRenderer"];
     BOOL isDislikeButton = [renderer slimButton_isDislikeButton];
     YTISlimMetadataToggleButtonRenderer *meta = renderer.slimMetadataToggleButtonRenderer;
+    YTIToggleButtonRenderer *buttonRenderer = meta.button.toggleButtonRenderer;
     BOOL changed = NO;
     if (isDislikeButton) {
         changed = self.toggled != toggled;
-        YTIToggleButtonRenderer *buttonRenderer = meta.button.toggleButtonRenderer;
         YTIFormattedString *formattedText = [%c(YTIFormattedString) formattedStringWithString:FETCHING];
-        buttonRenderer.toggledText = formattedText;
         buttonRenderer.defaultText = formattedText;
+        buttonRenderer.toggledText = formattedText;
     }
     %orig;
     if (changed && isDislikeButton) {
-        getDislikeFromVideoWithHandler(meta.target.videoId, maxRetryCount, ^(NSString *dislikeCount, BOOL isNumber) {
-            NSString *response = getNormalizedDislikes(dislikeCount, isNumber);
-            YTIFormattedString *formattedText = [%c(YTIFormattedString) formattedStringWithString:response];
-            [self.label setFormattedString:formattedText];
+        getDislikeFromVideoWithHandler(meta.target.videoId, maxRetryCount, ^(NSNumber *dislikeNumber, NSString *error) {
+            NSString *defaultText = getNormalizedDislikes(dislikeNumber, error);
+            NSString *toggledText = getNormalizedDislikes(@([dislikeNumber unsignedIntegerValue] + 1), error);
+            YTIFormattedString *formattedDefaultText = [%c(YTIFormattedString) formattedStringWithString:defaultText];
+            YTIFormattedString *formattedToggledText = [%c(YTIFormattedString) formattedStringWithString:toggledText];
+            buttonRenderer.defaultText = formattedDefaultText;
+            buttonRenderer.toggledText = formattedToggledText;
+            [self.label setFormattedString:toggled ? formattedToggledText : formattedDefaultText];
             [self setNeedsLayout];
         });
     }
@@ -484,37 +471,76 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
     [dislikeButton setTitle:FETCHING forState:UIControlStateNormal];
     [dislikeButton setTitle:FETCHING forState:UIControlStateSelected];
     int likeStatus = renderer.likeStatus;
-    getDislikeFromVideoWithHandler(renderer.target.videoId, maxRetryCount, ^(NSString *dislikeCount, BOOL isNumber) {
-        if (dislikeCount) {
-            NSString *formattedDislikeCount = getNormalizedDislikes(dislikeCount, isNumber);
-            YTIFormattedString *formattedText = [%c(YTIFormattedString) formattedStringWithString:formattedDislikeCount];
-            if (renderer.hasDislikeCountText) {
-                renderer.dislikeCountText = formattedText;
-            }
-            if (renderer.hasDislikeCountWithDislikeText) {
-                renderer.dislikeCountWithDislikeText = formattedText;
-            }
-            if (renderer.hasDislikeCountWithUndislikeText) {
-                renderer.dislikeCountWithUndislikeText = formattedText;
-            }
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (likeStatus == 1) {
-                    [dislikeButton setTitle:[renderer.dislikeCountWithUndislikeText stringWithFormattingRemoved] forState:UIControlStateNormal];
-                    [dislikeButton setTitle:[renderer.dislikeCountText stringWithFormattingRemoved] forState:UIControlStateSelected];
-                } else {
-                    [dislikeButton setTitle:[renderer.dislikeCountText stringWithFormattingRemoved] forState:UIControlStateNormal];
-                    [dislikeButton setTitle:[renderer.dislikeCountWithDislikeText stringWithFormattingRemoved] forState:UIControlStateSelected];
-                }
-            });
+    getDislikeFromVideoWithHandler(renderer.target.videoId, maxRetryCount, ^(NSNumber *dislikeNumber, NSString *error) {
+        NSString *formattedDislikeCount = getNormalizedDislikes(dislikeNumber, error);
+        YTIFormattedString *formattedText = [%c(YTIFormattedString) formattedStringWithString:formattedDislikeCount];
+        if (renderer.hasDislikeCountText) {
+            renderer.dislikeCountText = formattedText;
         }
+        if (renderer.hasDislikeCountWithDislikeText) {
+            renderer.dislikeCountWithDislikeText = formattedText;
+        }
+        if (renderer.hasDislikeCountWithUndislikeText) {
+            renderer.dislikeCountWithUndislikeText = formattedText;
+        }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (likeStatus == 1) {
+                [dislikeButton setTitle:[renderer.dislikeCountWithUndislikeText stringWithFormattingRemoved] forState:UIControlStateNormal];
+                [dislikeButton setTitle:[renderer.dislikeCountText stringWithFormattingRemoved] forState:UIControlStateSelected];
+            } else {
+                [dislikeButton setTitle:[renderer.dislikeCountText stringWithFormattingRemoved] forState:UIControlStateNormal];
+                [dislikeButton setTitle:[renderer.dislikeCountWithDislikeText stringWithFormattingRemoved] forState:UIControlStateSelected];
+            }
+        });
     });
 }
 
-- (void)triggerServiceEndpointForLikeButtonRenderer:(YTILikeButtonRenderer *)renderer forRequestID:(id)requestID withLikeStatus:(YTLikeStatus)likeStatus {
+%end
+
+%hook YTLikeService
+
+- (void)makeRequestWithStatus:(YTLikeStatus)likeStatus target:(YTILikeTarget *)target clickTrackingParams:(id)arg3 requestParams:(id)arg4 responseBlock:(id)arg5 errorBlock:(id)arg6 {
     if (VoteSubmissionEnabled()) {
-        sendVote(renderer.target.videoId, likeStatus);
+        sendVote(target.videoId, likeStatus);
     }
     %orig;
+}
+
+%end
+
+%hook _ASDisplayView
+
+- (void)didMoveToSuperview {
+    %orig;
+    ELMContainerNode *node = (ELMContainerNode *)self.keepalive_node;
+    if (node.yogaChildren.count != 2) {
+        return;
+    }
+    UIViewController *vc = [node closestViewController];
+    if (![vc isKindOfClass:%c(YTWatchNextResultsViewController)]) {
+        return;
+    }
+    NSString *accessibilityLabel = [node valueForKey:@"_accessibilityLabel"];
+    if (![accessibilityLabel isEqualToString:@"Dislike this video"]) {
+        return;
+    }
+    ELMTextNode *candidate = node.yogaChildren[1];
+    if (![candidate isKindOfClass:%c(ELMTextNode)]) {
+        return;
+    }
+    YTWatchController *wc = [vc valueForKey:@"_metadataPanelStateProvider"];
+    YTPlayerViewController *pvc = [wc valueForKey:@"_playerViewController"];
+    NSString *videoId = [pvc currentVideoID];
+    NSMutableAttributedString *mutableText = [[NSMutableAttributedString alloc] initWithAttributedString:candidate.attributedText];
+    mutableText.mutableString.string = FETCHING;
+    candidate.attributedText = mutableText;
+    getDislikeFromVideoWithHandler(videoId, maxRetryCount, ^(NSNumber *dislikeNumber, NSString *error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString *dislikeCount = getNormalizedDislikes(dislikeNumber, error);
+            mutableText.mutableString.string = dislikeCount;
+            candidate.attributedText = mutableText;
+        });
+    });
 }
 
 %end
