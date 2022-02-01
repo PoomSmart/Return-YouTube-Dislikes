@@ -3,8 +3,8 @@ Name: Return YouTube Dislike
 Version: 1.6.1
 Architecture: iphoneos-arm
 Description: Bring Back Dislikes On YouTube
-Maintainer: Lillie, PoomSmart, and kirb <ytdislikesreturn@gmail.com>
-Author: Lillie, PoomSmart, and kirb <ytdislikesreturn@gmail.com>
+Maintainer: PoomSmart and kirb <ytdislikesreturn@gmail.com>
+Author: PoomSmart and kirb <ytdislikesreturn@gmail.com>
 Section: Tweaks
 Depends: mobilesubstrate (>= 0.9.5000), firmware (>= 11.0)
 Tag: compatible_min::ios11.0
