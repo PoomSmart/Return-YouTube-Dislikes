@@ -13,12 +13,6 @@
 
 static NSCache <NSString *, NSNumber *> *cache;
 
-enum YTLikeStatus : int {
-    YTLikeStatusLike = 0,
-    YTLikeStatusDislike = 1,
-    YTLikeStatusNeutral = 2
-};
-
 static int toRYDLikeStatus(YTLikeStatus likeStatus) {
     switch (likeStatus) {
         case YTLikeStatusLike:
@@ -470,21 +464,23 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
     YTQTMButton *dislikeButton = self.dislikeButton;
     [dislikeButton setTitle:FETCHING forState:UIControlStateNormal];
     [dislikeButton setTitle:FETCHING forState:UIControlStateSelected];
-    int likeStatus = renderer.likeStatus;
+    YTLikeStatus likeStatus = renderer.likeStatus;
     getDislikeFromVideoWithHandler(renderer.target.videoId, maxRetryCount, ^(NSNumber *dislikeNumber, NSString *error) {
         NSString *formattedDislikeCount = getNormalizedDislikes(dislikeNumber, error);
+        NSString *formattedToggledDislikeCount = getNormalizedDislikes(@([dislikeNumber unsignedIntegerValue] + 1), error);
         YTIFormattedString *formattedText = [%c(YTIFormattedString) formattedStringWithString:formattedDislikeCount];
+        YTIFormattedString *formattedToggledText = [%c(YTIFormattedString) formattedStringWithString:formattedToggledDislikeCount];
         if (renderer.hasDislikeCountText) {
             renderer.dislikeCountText = formattedText;
         }
         if (renderer.hasDislikeCountWithDislikeText) {
-            renderer.dislikeCountWithDislikeText = formattedText;
+            renderer.dislikeCountWithDislikeText = formattedToggledText;
         }
         if (renderer.hasDislikeCountWithUndislikeText) {
             renderer.dislikeCountWithUndislikeText = formattedText;
         }
         dispatch_async(dispatch_get_main_queue(), ^{
-            if (likeStatus == 1) {
+            if (likeStatus == YTLikeStatusDislike) {
                 [dislikeButton setTitle:[renderer.dislikeCountWithUndislikeText stringWithFormattingRemoved] forState:UIControlStateNormal];
                 [dislikeButton setTitle:[renderer.dislikeCountText stringWithFormattingRemoved] forState:UIControlStateSelected];
             } else {
