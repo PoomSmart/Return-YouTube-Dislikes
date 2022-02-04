@@ -1,6 +1,7 @@
 #import <CommonCrypto/CommonDigest.h>
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import <HBLog.h>
 #import "Tweak.h"
 
 #define maxRetryCount 3
@@ -442,6 +443,35 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
     }
     %orig;
     if (changed && isDislikeButton) {
+        getDislikeFromVideoWithHandler(meta.target.videoId, maxRetryCount, ^(NSNumber *dislikeNumber, NSString *error) {
+            NSString *defaultText = getNormalizedDislikes(dislikeNumber, error);
+            NSString *toggledText = getNormalizedDislikes(@([dislikeNumber unsignedIntegerValue] + 1), error);
+            YTIFormattedString *formattedDefaultText = [%c(YTIFormattedString) formattedStringWithString:defaultText];
+            YTIFormattedString *formattedToggledText = [%c(YTIFormattedString) formattedStringWithString:toggledText];
+            buttonRenderer.defaultText = formattedDefaultText;
+            buttonRenderer.toggledText = formattedToggledText;
+            [self.label setFormattedString:toggled ? formattedToggledText : formattedDefaultText];
+            [self setNeedsLayout];
+        });
+    }
+}
+
+%end
+
+%hook YTFullscreenEngagementActionBarButtonView
+
+- (void)updateButtonAndLabelForToggled:(BOOL)toggled {
+    YTFullscreenEngagementActionBarButtonRenderer *renderer = [self valueForKey:@"_buttonRenderer"];
+    BOOL isDislikeButton = [renderer isDislikeButton];
+    YTISlimMetadataToggleButtonRenderer *meta = [renderer valueForKey:@"_toggleButtonRenderer"];
+    YTIToggleButtonRenderer *buttonRenderer = meta.button.toggleButtonRenderer;
+    if (isDislikeButton) {
+        YTIFormattedString *formattedText = [%c(YTIFormattedString) formattedStringWithString:FETCHING];
+        buttonRenderer.defaultText = formattedText;
+        buttonRenderer.toggledText = formattedText;
+    }
+    %orig;
+    if (isDislikeButton) {
         getDislikeFromVideoWithHandler(meta.target.videoId, maxRetryCount, ^(NSNumber *dislikeNumber, NSString *error) {
             NSString *defaultText = getNormalizedDislikes(dislikeNumber, error);
             NSString *toggledText = getNormalizedDislikes(@([dislikeNumber unsignedIntegerValue] + 1), error);
