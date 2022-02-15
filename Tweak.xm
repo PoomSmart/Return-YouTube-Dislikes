@@ -546,8 +546,7 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
     if (![vc isKindOfClass:%c(YTWatchNextResultsViewController)]) {
         return;
     }
-    NSString *accessibilityLabel = [node valueForKey:@"_accessibilityLabel"];
-    if (![accessibilityLabel isEqualToString:@"Dislike this video"]) {
+    if (![node.accessibilityIdentifier isEqualToString:@"id.video.dislike.button"]) {
         return;
     }
     ELMTextNode *candidate = node.yogaChildren[1];
