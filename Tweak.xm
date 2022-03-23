@@ -450,8 +450,10 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
             YTIFormattedString *formattedToggledText = [%c(YTIFormattedString) formattedStringWithString:toggledText];
             buttonRenderer.defaultText = formattedDefaultText;
             buttonRenderer.toggledText = formattedToggledText;
-            [self.label setFormattedString:toggled ? formattedToggledText : formattedDefaultText];
-            [self setNeedsLayout];
+            if ([self isKindOfClass:%c(YTSlimVideoDetailsActionView)]) {
+                [self.label setFormattedString:toggled ? formattedToggledText : formattedDefaultText];
+                [self setNeedsLayout];
+            }
         });
     }
 }
@@ -479,8 +481,10 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
             YTIFormattedString *formattedToggledText = [%c(YTIFormattedString) formattedStringWithString:toggledText];
             buttonRenderer.defaultText = formattedDefaultText;
             buttonRenderer.toggledText = formattedToggledText;
-            [self.label setFormattedString:toggled ? formattedToggledText : formattedDefaultText];
-            [self setNeedsLayout];
+            if ([self isKindOfClass:%c(YTFullscreenEngagementActionBarButtonView)]) {
+                [self.label setFormattedString:toggled ? formattedToggledText : formattedDefaultText];
+                [self setNeedsLayout];
+            }
         });
     }
 }
