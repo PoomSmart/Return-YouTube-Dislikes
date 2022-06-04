@@ -1,4 +1,5 @@
 #import "../YouTubeHeader/YTIFormattedString.h"
+#import "../YouTubeHeader/YTAlertView.h"
 #import "../YouTubeHeader/YTQTMButton.h"
 #import "../YouTubeHeader/YTFullscreenEngagementActionBarButtonRenderer.h"
 #import "../YouTubeHeader/YTFullscreenEngagementActionBarButtonView.h"

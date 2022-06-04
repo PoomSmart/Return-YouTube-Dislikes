@@ -9,6 +9,7 @@
 #define UserIDKey @"RYD-USER-ID"
 #define RegistrationConfirmedKey @"RYD-USER-REGISTERED"
 #define EnableVoteSubmissionKey @"RYD-VOTE-SUBMISSION"
+#define DidShowEnableVoteSubmissionAlertKey @"RYD-DID-SHOW-VOTE-SUBMISSION-ALERT"
 #define FETCHING @"Fetching"
 #define FAILED @"Failed"
 
@@ -574,6 +575,12 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
 
 %end
 
+static void enableVoteSubmission(BOOL enabled) {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setBool:enabled forKey:EnableVoteSubmissionKey];
+    [defaults synchronize];
+}
+
 %hook YTSettingsViewController
 
 - (void)setSectionItems:(NSMutableArray <YTSettingsSectionItem *> *)sectionItems forCategory:(NSInteger)category title:(NSString *)title titleDescription:(NSString *)titleDescription headerHidden:(BOOL)headerHidden {
@@ -587,9 +594,7 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
                 accessibilityIdentifier:nil
                 switchOn:VoteSubmissionEnabled()
                 switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
-                    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-                    [defaults setBool:enabled forKey:EnableVoteSubmissionKey];
-                    [defaults synchronize];
+                    enableVoteSubmission(enabled);
                     return YES;
                 }
                 settingItemId:0];
@@ -603,4 +608,16 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
 
 %ctor {
     cache = [NSCache new];
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    if (![defaults boolForKey:DidShowEnableVoteSubmissionAlertKey] && !VoteSubmissionEnabled()) {
+        [defaults setBool:YES forKey:DidShowEnableVoteSubmissionAlertKey];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            YTAlertView *alertView = [%c(YTAlertView) confirmationDialogWithAction:^{
+                enableVoteSubmission(YES);
+            } actionTitle:@"Enable"];
+            alertView.title = @"Return YouTube Dislike";
+            alertView.subtitle = @"Do you want to enable submission of your likes/dislikes data to returnyoutubedislikeapi.com now? You may disable it later from Settings > General > Enable vote submission.";
+            [alertView show];
+        });
+    }
 }
