@@ -182,7 +182,7 @@ static NSString *solvePuzzle(NSDictionary *data) {
     for (int i = 0; i < decoded.length; ++i) {
         c[i] = [decoded characterAtIndex:i];
     }
-    int maxCount = (1 << difficulty) * 5;
+    int maxCount = (1 << difficulty) * 3;
     for (int i = 4; i < 20; ++i) {
         buffer[i] = c[i - 4];
     }
@@ -531,6 +531,13 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
 %hook YTLikeService
 
 - (void)makeRequestWithStatus:(YTLikeStatus)likeStatus target:(YTILikeTarget *)target clickTrackingParams:(id)arg3 requestParams:(id)arg4 responseBlock:(id)arg5 errorBlock:(id)arg6 {
+    if (VoteSubmissionEnabled()) {
+        sendVote(target.videoId, likeStatus);
+    }
+    %orig;
+}
+
+- (void)makeRequestWithStatus:(YTLikeStatus)likeStatus target:(YTILikeTarget *)target clickTrackingParams:(id)arg3 queueContextParams:(id)arg4 requestParams:(id)arg5 responseBlock:(id)arg6 errorBlock:(id)arg7 {
     if (VoteSubmissionEnabled()) {
         sendVote(target.videoId, likeStatus);
     }
