@@ -546,6 +546,11 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
 
 %end
 
+id safeValueForKey(id x, const char *s) {
+    Ivar ivar = class_getInstanceVariable([x class], s);
+    return object_getIvar(x, ivar);
+}
+
 %hook _ASDisplayView
 
 - (void)didMoveToSuperview {
@@ -565,7 +570,10 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
     if (![candidate isKindOfClass:%c(ELMTextNode)]) {
         return;
     }
-    YTWatchController *wc = [vc valueForKey:@"_metadataPanelStateProvider"];
+    YTWatchController *wc = safeValueForKey(vc, "_metadataPanelStateProvider");
+    if (!wc) {
+        return;
+    }
     YTPlayerViewController *pvc = [wc valueForKey:@"_playerViewController"];
     NSString *videoId = [pvc currentVideoID];
     NSMutableAttributedString *mutableText = [[NSMutableAttributedString alloc] initWithAttributedString:candidate.attributedText];
