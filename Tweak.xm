@@ -565,8 +565,14 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
     if (![candidate isKindOfClass:%c(ELMTextNode)]) {
         return;
     }
-    YTWatchController *wc = [vc valueForKey:@"_metadataPanelStateProvider"];
-    YTPlayerViewController *pvc = [wc valueForKey:@"_playerViewController"];
+    NSObject *wc = [vc valueForKey:@"_metadataPanelStateProvider"];
+    YTPlayerViewController *pvc;
+    if ([wc isKindOfClass:%c(YTWatchController)]) {
+        pvc = [wc valueForKey:@"_playerViewController"];
+    } else if ([wc isKindOfClass:%c(YTPlaybackStrippedWatchController)]) {
+        YTWatchPlaybackController *wpc = ((YTPlaybackStrippedWatchController *)wc).watchPlaybackController;
+        pvc = [wpc valueForKey:@"_playerViewController"];
+    }
     NSString *videoId = [pvc currentVideoID];
     NSMutableAttributedString *mutableText = [[NSMutableAttributedString alloc] initWithAttributedString:candidate.attributedText];
     mutableText.mutableString.string = FETCHING;

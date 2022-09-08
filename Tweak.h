@@ -11,7 +11,7 @@
 #import "../YouTubeHeader/YTReelWatchLikesController.h"
 #import "../YouTubeHeader/YTSettingsCell.h"
 #import "../YouTubeHeader/YTSettingsSectionItem.h"
-#import "../YouTubeHeader/YTWatchController.h"
+#import "../YouTubeHeader/YTPlaybackStrippedWatchController.h"
 #import "../YouTubeHeader/YTPlayerViewController.h"
 #import "../YouTubeHeader/ELMContainerNode.h"
 #import "../YouTubeHeader/ELMTextNode.h"
