@@ -574,7 +574,10 @@ id safeValueForKey(id x, const char *s) {
     if (!wc) {
         return;
     }
-    YTPlayerViewController *pvc = [wc valueForKey:@"_playerViewController"];
+    YTPlayerViewController *pvc = safeValueForKey(wc, "_playerViewController");
+    if (!pvc) {
+        return;
+    }
     NSString *videoId = [pvc currentVideoID];
     NSMutableAttributedString *mutableText = [[NSMutableAttributedString alloc] initWithAttributedString:candidate.attributedText];
     mutableText.mutableString.string = FETCHING;
