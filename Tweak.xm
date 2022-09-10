@@ -551,15 +551,29 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
 - (void)didMoveToSuperview {
     %orig;
     ELMContainerNode *node = (ELMContainerNode *)self.keepalive_node;
-    if (node.yogaChildren.count != 2) {
+    if (![node.accessibilityIdentifier isEqualToString:@"id.video.dislike.button"]) {
         return;
     }
     UIViewController *vc = [node closestViewController];
     if (![vc isKindOfClass:%c(YTWatchNextResultsViewController)]) {
         return;
     }
-    if (![node.accessibilityIdentifier isEqualToString:@"id.video.dislike.button"]) {
-        return;
+    NSString *likeCount = nil;
+    if (node.yogaChildren.count != 2) {
+        _ASDisplayView *superview = (_ASDisplayView *)self.superview;
+        ELMContainerNode *snode = (ELMContainerNode *)superview.keepalive_node;
+        ELMContainerNode *likeNode = snode.yogaChildren[0];
+        if (![likeNode.accessibilityIdentifier isEqualToString:@"id.video.like.button"] || likeNode.yogaChildren.count < 2) {
+            return;
+        }
+        ELMTextNode *likeTextNode = likeNode.yogaChildren[1];
+        if (![likeTextNode isKindOfClass:%c(ELMTextNode)]) {
+            return;
+        }
+        likeCount = likeTextNode.attributedText.string;
+        NSMutableArray *newArray = [node.yogaChildren mutableCopy];
+        [newArray addObject:likeTextNode];
+        node.yogaChildren = newArray;
     }
     ELMTextNode *candidate = node.yogaChildren[1];
     if (![candidate isKindOfClass:%c(ELMTextNode)]) {
@@ -580,7 +594,7 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
     getDislikeFromVideoWithHandler(videoId, maxRetryCount, ^(NSNumber *dislikeNumber, NSString *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
             NSString *dislikeCount = getNormalizedDislikes(dislikeNumber, error);
-            mutableText.mutableString.string = dislikeCount;
+            mutableText.mutableString.string = likeCount ? [NSString stringWithFormat:@"%@ | %@", likeCount, dislikeCount] : dislikeCount;
             candidate.attributedText = mutableText;
         });
     });
@@ -589,9 +603,7 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
 %end
 
 static void enableVoteSubmission(BOOL enabled) {
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setBool:enabled forKey:EnableVoteSubmissionKey];
-    [defaults synchronize];
+    [[NSUserDefaults standardUserDefaults] setBool:enabled forKey:EnableVoteSubmissionKey];
 }
 
 %hook YTSettingsViewController
