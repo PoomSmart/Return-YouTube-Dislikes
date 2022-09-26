@@ -10,10 +10,29 @@
 #define RegistrationConfirmedKey @"RYD-USER-REGISTERED"
 #define EnableVoteSubmissionKey @"RYD-VOTE-SUBMISSION"
 #define DidShowEnableVoteSubmissionAlertKey @"RYD-DID-SHOW-VOTE-SUBMISSION-ALERT"
-#define FETCHING @"Fetching"
-#define FAILED @"Failed"
+#define FETCHING @"⌛"
+#define FAILED @"❌"
+
+#define _LOC(b, x) [b localizedStringForKey:x value:nil table:nil]
+#define LOC(x) _LOC(tweakBundle, x)
 
 static NSCache <NSString *, NSNumber *> *cache;
+
+NSBundle *RYDBundle() {
+    static NSBundle *bundle = nil;
+    static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+        NSString *tweakBundlePath = [[NSBundle mainBundle] pathForResource:@"RYD" ofType:@"bundle"];
+        if (tweakBundlePath)
+            bundle = [NSBundle bundleWithPath:tweakBundlePath];
+        else {
+            bundle = [NSBundle bundleWithPath:@"/Library/Application Support/RYD.bundle"];
+            if (!bundle)
+                bundle = [NSBundle bundleWithPath:@"/var/jb/Library/Application Support/RYD.bundle"];
+        }
+    });
+    return bundle;
+}
 
 static int toRYDLikeStatus(YTLikeStatus likeStatus) {
     switch (likeStatus) {
@@ -614,8 +633,9 @@ static void enableVoteSubmission(BOOL enabled) {
             return item.settingItemId == 265;
         }];
         if (statsForNerdsIndex != NSNotFound) {
-            YTSettingsSectionItem *vote = [%c(YTSettingsSectionItem) switchItemWithTitle:@"Enable vote submission"
-                titleDescription:@"Allow your unique anonymous ID and videos/shorts likes/dislikes data to be submitted to returnyoutubedislikeapi.com"
+            NSBundle *tweakBundle = RYDBundle();
+            YTSettingsSectionItem *vote = [%c(YTSettingsSectionItem) switchItemWithTitle:LOC(@"ENABLE_VOTE_SUBMIT")
+                titleDescription:[NSString stringWithFormat:LOC(@"ENABLE_VOTE_SUBMIT_DESC"), apiUrl]
                 accessibilityIdentifier:nil
                 switchOn:VoteSubmissionEnabled()
                 switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
@@ -637,11 +657,12 @@ static void enableVoteSubmission(BOOL enabled) {
     if (![defaults boolForKey:DidShowEnableVoteSubmissionAlertKey] && !VoteSubmissionEnabled()) {
         [defaults setBool:YES forKey:DidShowEnableVoteSubmissionAlertKey];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            NSBundle *tweakBundle = RYDBundle();
             YTAlertView *alertView = [%c(YTAlertView) confirmationDialogWithAction:^{
                 enableVoteSubmission(YES);
-            } actionTitle:@"Enable"];
+            } actionTitle:_LOC([NSBundle mainBundle], @"settings.yes")];
             alertView.title = @"Return YouTube Dislike";
-            alertView.subtitle = @"Do you want to enable submission of your likes/dislikes data to returnyoutubedislikeapi.com now? You may disable it later from Settings > General > Enable vote submission.";
+            alertView.subtitle = [NSString stringWithFormat:LOC(@"WANT_TO_ENABLE"), apiUrl, LOC(@"ENABLE_VOTE_SUBMIT")];
             [alertView show];
         });
     }
