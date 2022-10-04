@@ -1,0 +1,6 @@
+// Settings
+"ENABLE_VOTE_SUBMIT" = "투표 제출 활성화";
+"ENABLE_VOTE_SUBMIT_DESC" = "고유한 익명 ID와 동영상/쇼츠의 좋아요/싫어요 데이터를 %@ 에 제출하도록 허용합니다.";
+
+// On app launch
+"WANT_TO_ENABLE" = "%@ 에 좋아요/싫어요 데이터 제출을 활성화하시겠습니까? 나중에 설정 > 일반 > %@ 에서 비활성화할 수 있습니다.";
