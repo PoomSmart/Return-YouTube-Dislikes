@@ -1,0 +1,6 @@
+// Settings
+"ENABLE_VOTE_SUBMIT" = "上传顶/踩数据";
+"ENABLE_VOTE_SUBMIT_DESC" = "允许将您的唯一匿名ID和顶/踩数据上传至 %@。";
+
+// On app launch
+"WANT_TO_ENABLE" = "您想将您的顶/踩数据上传到 %@吗？您可随时通过“设置 > 常规 > %@”关闭数据上传。";
