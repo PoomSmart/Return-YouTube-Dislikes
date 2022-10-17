@@ -1,0 +1,6 @@
+// Settings
+"ENABLE_VOTE_SUBMIT" = "上傳喜歡/不喜歡數據";
+"ENABLE_VOTE_SUBMIT_DESC" = "允許將您的唯一匿名ID和喜歡/不喜歡數據上傳至 %@。";
+
+// On app launch
+"WANT_TO_ENABLE" = "您想將您的喜歡/不喜歡數據上傳到 %@嗎？您可隨時通過“設定 > 一般 > %@”關閉數據上傳。";
