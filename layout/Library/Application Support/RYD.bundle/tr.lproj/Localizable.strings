@@ -1,6 +1,0 @@
-// Settings
-"ENABLE_VOTE_SUBMIT" = "Oy gönderimini etkinleştir";
-"ENABLE_VOTE_SUBMIT_DESC" = "Benzersiz anonim kimliğinizin ve video/short beğeni/beğenmeme verilerinizin şu adrese gönderilmesine izin verin %@.";
-
-// On app launch
-"WANT_TO_ENABLE" = "Beğenme/beğenmeme verilerinizin %@'ye gönderilmesini şimdi etkinleştirmek istiyor musunuz? Bunu daha sonra Ayarlar > Genel > %@ bölümünden devre dışı bırakabilirsiniz.";
