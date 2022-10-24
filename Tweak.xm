@@ -600,10 +600,15 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
     }
     NSObject *wc = [vc valueForKey:@"_metadataPanelStateProvider"];
     YTPlayerViewController *pvc;
-    if ([wc isKindOfClass:%c(YTWatchController)]) {
-        pvc = [wc valueForKey:@"_playerViewController"];
-    } else if ([wc isKindOfClass:%c(YTPlaybackStrippedWatchController)]) {
-        YTWatchPlaybackController *wpc = ((YTPlaybackStrippedWatchController *)wc).watchPlaybackController;
+    @try {
+        if ([wc isKindOfClass:%c(YTWatchController)]) {
+            pvc = [wc valueForKey:@"_playerViewController"];
+        } else if ([wc isKindOfClass:%c(YTPlaybackStrippedWatchController)]) {
+            YTWatchPlaybackController *wpc = ((YTPlaybackStrippedWatchController *)wc).watchPlaybackController;
+            pvc = [wpc valueForKey:@"_playerViewController"];
+        }
+    } @catch (id ex) {
+        YTWatchPlaybackController *wpc = ((YTWatchController *)wc).watchPlaybackController;
         pvc = [wpc valueForKey:@"_playerViewController"];
     }
     NSString *videoId = [pvc currentVideoID];

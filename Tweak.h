@@ -13,6 +13,7 @@
 #import "../YouTubeHeader/YTSettingsSectionItem.h"
 #import "../YouTubeHeader/YTPlaybackStrippedWatchController.h"
 #import "../YouTubeHeader/YTPlayerViewController.h"
+#import "../YouTubeHeader/YTWatchController.h"
 #import "../YouTubeHeader/ELMContainerNode.h"
 #import "../YouTubeHeader/ELMTextNode.h"
 #import "../YouTubeHeader/_ASDisplayView.h"
