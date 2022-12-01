@@ -1,6 +1,8 @@
 // Settings
 "ENABLE_VOTE_SUBMIT" = "Включить отправку голосов";
 "ENABLE_VOTE_SUBMIT_DESC" = "Разрешает отправку ваших данных о Лайках/Дизлайках в Видео и Shorts под уникальным анонимным идентификатором на сайт %@.";
+"EXACT_NUMBER" = "Exact dislike numbers";
+"EXACT_NUMBER_DESC" = "Display exact number of dislikes. For example: %@ -> %@.";
 
 // On app launch
 "WANT_TO_ENABLE" = "Хотите разрешить отправку ваших данных о Лайках/Дизлайках на %@? Данную функцию можно отключить в Настройках > Общие > %@.";

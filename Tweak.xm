@@ -9,12 +9,19 @@
 #define UserIDKey @"RYD-USER-ID"
 #define RegistrationConfirmedKey @"RYD-USER-REGISTERED"
 #define EnableVoteSubmissionKey @"RYD-VOTE-SUBMISSION"
+#define ExactKey @"RYD-EXACT-NUMBER"
 #define DidShowEnableVoteSubmissionAlertKey @"RYD-DID-SHOW-VOTE-SUBMISSION-ALERT"
 #define FETCHING @"⌛"
 #define FAILED @"❌"
 
 #define _LOC(b, x) [b localizedStringForKey:x value:nil table:nil]
 #define LOC(x) _LOC(tweakBundle, x)
+
+static const NSInteger RYDSection = 1080;
+
+@interface YTSettingsSectionItemManager (RYD)
+- (void)updateRYDSectionWithEntry:(id)entry;
+@end
 
 static NSCache <NSString *, NSNumber *> *cache;
 
@@ -55,6 +62,10 @@ static BOOL isRegistered() {
 
 static BOOL VoteSubmissionEnabled() {
     return [[NSUserDefaults standardUserDefaults] boolForKey:EnableVoteSubmissionKey];
+}
+
+static BOOL ExactDislikeNumber() {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:ExactKey];
 }
 
 static const char *charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -354,6 +365,9 @@ static NSString *getNormalizedDislikes(NSNumber *dislikeNumber, NSString *error)
     if (error) {
         return error;
     }
+    if (ExactDislikeNumber()) {
+        return [NSNumberFormatter localizedStringFromNumber:dislikeNumber numberStyle:NSNumberFormatterDecimalStyle];
+    }
     NSString *dislikeCount = [dislikeNumber stringValue];
     NSUInteger digits = dislikeCount.length;
     if (digits <= 3) { // 0 - 999
@@ -599,18 +613,8 @@ static void getDislikeFromVideoWithHandler(NSString *videoId, int retryCount, vo
         return;
     }
     NSObject *wc = [vc valueForKey:@"_metadataPanelStateProvider"];
-    YTPlayerViewController *pvc;
-    @try {
-        if ([wc isKindOfClass:%c(YTWatchController)]) {
-            pvc = [wc valueForKey:@"_playerViewController"];
-        } else if ([wc isKindOfClass:%c(YTPlaybackStrippedWatchController)]) {
-            YTWatchPlaybackController *wpc = ((YTPlaybackStrippedWatchController *)wc).watchPlaybackController;
-            pvc = [wpc valueForKey:@"_playerViewController"];
-        }
-    } @catch (id ex) {
-        YTWatchPlaybackController *wpc = ((YTWatchController *)wc).watchPlaybackController;
-        pvc = [wpc valueForKey:@"_playerViewController"];
-    }
+    YTWatchPlaybackController *wpc = ((YTWatchController *)wc).watchPlaybackController;
+    YTPlayerViewController *pvc = [wpc valueForKey:@"_playerViewController"];
     NSString *videoId = [pvc currentVideoID];
     NSMutableAttributedString *mutableText = [[NSMutableAttributedString alloc] initWithAttributedString:candidate.attributedText];
     mutableText.mutableString.string = FETCHING;
@@ -630,28 +634,55 @@ static void enableVoteSubmission(BOOL enabled) {
     [[NSUserDefaults standardUserDefaults] setBool:enabled forKey:EnableVoteSubmissionKey];
 }
 
-%hook YTSettingsViewController
+%hook YTAppSettingsPresentationData
 
-- (void)setSectionItems:(NSMutableArray <YTSettingsSectionItem *> *)sectionItems forCategory:(NSInteger)category title:(NSString *)title titleDescription:(NSString *)titleDescription headerHidden:(BOOL)headerHidden {
-    if (category == 1) {
-        NSUInteger statsForNerdsIndex = [sectionItems indexOfObjectPassingTest:^BOOL (YTSettingsSectionItem *item, NSUInteger idx, BOOL *stop) { 
-            return item.settingItemId == 265;
-        }];
-        if (statsForNerdsIndex != NSNotFound) {
-            NSBundle *tweakBundle = RYDBundle();
-            YTSettingsSectionItem *vote = [%c(YTSettingsSectionItem) switchItemWithTitle:LOC(@"ENABLE_VOTE_SUBMIT")
-                titleDescription:[NSString stringWithFormat:LOC(@"ENABLE_VOTE_SUBMIT_DESC"), apiUrl]
-                accessibilityIdentifier:nil
-                switchOn:VoteSubmissionEnabled()
-                switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
-                    enableVoteSubmission(enabled);
-                    return YES;
-                }
-                settingItemId:0];
-            [sectionItems insertObject:vote atIndex:statsForNerdsIndex + 1];
++ (NSArray *)settingsCategoryOrder {
+    NSArray *order = %orig;
+    NSMutableArray *mutableOrder = [order mutableCopy];
+    NSUInteger insertIndex = [order indexOfObject:@(1)];
+    if (insertIndex != NSNotFound)
+        [mutableOrder insertObject:@(RYDSection) atIndex:insertIndex + 1];
+    return mutableOrder;
+}
+
+%end
+
+%hook YTSettingsSectionItemManager
+
+%new(v@:@)
+- (void)updateRYDSectionWithEntry:(id)entry {
+    NSMutableArray *sectionItems = [NSMutableArray array];
+    NSBundle *tweakBundle = RYDBundle();
+    YTSettingsViewController *delegate = [self valueForKey:@"_dataDelegate"];
+    YTSettingsSectionItem *vote = [%c(YTSettingsSectionItem) switchItemWithTitle:LOC(@"ENABLE_VOTE_SUBMIT")
+        titleDescription:[NSString stringWithFormat:LOC(@"ENABLE_VOTE_SUBMIT_DESC"), apiUrl]
+        accessibilityIdentifier:nil
+        switchOn:VoteSubmissionEnabled()
+        switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
+            enableVoteSubmission(enabled);
+            return YES;
         }
+        settingItemId:0];
+    [sectionItems addObject:vote];
+    YTSettingsSectionItem *exact = [%c(YTSettingsSectionItem) switchItemWithTitle:LOC(@"EXACT_NUMBER")
+        titleDescription:[NSString stringWithFormat:LOC(@"EXACT_NUMBER_DESC"), @"12345", [NSNumberFormatter localizedStringFromNumber:@(12345) numberStyle:NSNumberFormatterDecimalStyle]]
+        accessibilityIdentifier:nil
+        switchOn:ExactDislikeNumber()
+        switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
+            [[NSUserDefaults standardUserDefaults] setBool:enabled forKey:ExactKey];
+            return YES;
+        }
+        settingItemId:0];
+    [sectionItems addObject:exact];
+    [delegate setSectionItems:sectionItems forCategory:RYDSection title:@"Return YouTube Dislike" titleDescription:nil headerHidden:NO];
+}
+
+- (void)updateSectionForCategory:(NSUInteger)category withEntry:(id)entry {
+    if (category == RYDSection) {
+        [self updateRYDSectionWithEntry:entry];
+        return;
     }
-    %orig(sectionItems, category, title, titleDescription, headerHidden);
+    %orig;
 }
 
 %end

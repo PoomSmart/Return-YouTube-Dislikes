@@ -1,6 +1,8 @@
 // Settings
 "ENABLE_VOTE_SUBMIT" = "Ativar envio de votos";
 "ENABLE_VOTE_SUBMIT_DESC" = "Permite que seu único ID anônimo e dados de curtidas/não curtidas de vídeos/shorts sejam enviados para %@.";
+"EXACT_NUMBER" = "Exact dislike numbers";
+"EXACT_NUMBER_DESC" = "Display exact number of dislikes. For example: %@ -> %@.";
 
 // On app launch
 "WANT_TO_ENABLE" = "Você deseja ativar o envio de seus dados de curtidas/não curtidas para %@ agora? Você pode desativá-lo mais tarde em Configurações > Geral > %@.";

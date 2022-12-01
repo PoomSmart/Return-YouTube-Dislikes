@@ -1,6 +1,8 @@
 // Settings
 "ENABLE_VOTE_SUBMIT" = "تفعيل إرسال التصويت";
 "ENABLE_VOTE_SUBMIT_DESC" = "السماح بإرسال بيانات الإعجاب وعدم الإعجاب عبر معرف فريد ومجهول المصدر (بشكل حافظ للخصوصية) إلى %@.";
+"EXACT_NUMBER" = "Exact dislike numbers";
+"EXACT_NUMBER_DESC" = "Display exact number of dislikes. For example: %@ -> %@.";
 
 // On app launch
 "WANT_TO_ENABLE" = "هل ترغب في تمكين إرسال بيانات الإعجاب وعدم الإعجاب إلى %@ الآن؟ بإمكانك تعطيل ذلك من الإعدادات > إعدادات عامة > %@.";
