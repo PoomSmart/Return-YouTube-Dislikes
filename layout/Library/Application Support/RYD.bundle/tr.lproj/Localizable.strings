@@ -5,4 +5,4 @@
 "EXACT_NUMBER_DESC" = "Display exact number of dislikes. For example: %@ -> %@.";
 
 // On app launch
-"WANT_TO_ENABLE" = "Beğenme/beğenmeme verilerinizin %@'ye gönderilmesini şimdi etkinleştirmek istiyor musunuz? Bunu daha sonra Ayarlar > Genel > %@ bölümünden devre dışı bırakabilirsiniz.";
+"WANT_TO_ENABLE" = "Beğenme/beğenmeme verilerinizin %@'ye gönderilmesini şimdi etkinleştirmek istiyor musunuz? Bunu daha sonra Ayarlar > %@ > %@ bölümünden devre dışı bırakabilirsiniz.";

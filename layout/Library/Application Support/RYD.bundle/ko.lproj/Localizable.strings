@@ -5,4 +5,4 @@
 "EXACT_NUMBER_DESC" = "Display exact number of dislikes. For example: %@ -> %@.";
 
 // On app launch
-"WANT_TO_ENABLE" = "%@ 에 좋아요/싫어요 데이터 제출을 활성화하시겠습니까? 나중에 설정 > 일반 > %@ 에서 비활성화할 수 있습니다.";
+"WANT_TO_ENABLE" = "%@ 에 좋아요/싫어요 데이터 제출을 활성화하시겠습니까? 나중에 설정 > %@ > %@ 에서 비활성화할 수 있습니다.";

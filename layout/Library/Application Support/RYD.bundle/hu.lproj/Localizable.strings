@@ -5,4 +5,4 @@
 "EXACT_NUMBER_DESC" = "Display exact number of dislikes. For example: %@ -> %@.";
 
 // On app launch
-"WANT_TO_ENABLE" = "Engedélyezi a tetszésnyilvánítási/nemtetszésnyilvánítási adatok elküldését a %@ számára? Később letilthatja a Beállítások > Általános > %@ menüpontban.";
+"WANT_TO_ENABLE" = "Engedélyezi a tetszésnyilvánítási/nemtetszésnyilvánítási adatok elküldését a %@ számára? Később letilthatja a Beállítások > %@ > %@ menüpontban.";

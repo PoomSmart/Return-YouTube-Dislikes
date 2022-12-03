@@ -5,4 +5,4 @@
 "EXACT_NUMBER_DESC" = "Display exact number of dislikes. For example: %@ -> %@.";
 
 // On app launch
-"WANT_TO_ENABLE" = "您想将您的顶/踩数据上传到 %@吗？您可随时通过“设置 > 常规 > %@”关闭数据上传。";
+"WANT_TO_ENABLE" = "您想将您的顶/踩数据上传到 %@吗？您可随时通过“设置 > %@ > %@”关闭数据上传。";

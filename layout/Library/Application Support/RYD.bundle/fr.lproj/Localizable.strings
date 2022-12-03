@@ -5,4 +5,4 @@
 "EXACT_NUMBER_DESC" = "Display exact number of dislikes. For example: %@ -> %@.";
 
 // On app launch
-"WANT_TO_ENABLE" = "Voulez-vous autoriser l'envoi de vos données de likes/dislikes à %@ ? Vous pouvez le désactiver à tout moment dans Réglages > Général > %@.";
+"WANT_TO_ENABLE" = "Voulez-vous autoriser l'envoi de vos données de likes/dislikes à %@ ? Vous pouvez le désactiver à tout moment dans Réglages > %@ > %@.";

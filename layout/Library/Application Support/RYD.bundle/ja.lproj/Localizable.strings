@@ -5,4 +5,4 @@
 "EXACT_NUMBER_DESC" = "Display exact number of dislikes. For example: %@ -> %@.";
 
 // On app launch 
-"WANT_TO_ENABLE" = "高評価/低評価のデータを %@ に送信することを許可しますか？後から設定 > 全般 > %@ で無効にすることができます。";
+"WANT_TO_ENABLE" = "高評価/低評価のデータを %@ に送信することを許可しますか？後から設定 > %@ > %@ で無効にすることができます。";

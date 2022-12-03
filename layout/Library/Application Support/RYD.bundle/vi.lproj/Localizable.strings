@@ -5,4 +5,4 @@
 "EXACT_NUMBER_DESC" = "Display exact number of dislikes. For example: %@ -> %@.";
 
 // On app launch
-"WANT_TO_ENABLE" = "Bạn có muốn chia sẻ dữ liệu về các lượt thích/không thích của bạn tới %@ bây giờ không? Bạn có thể tắt tùy chọn này trong Cài đặt của YouTube > Chung > %@.";
+"WANT_TO_ENABLE" = "Bạn có muốn chia sẻ dữ liệu về các lượt thích/không thích của bạn tới %@ bây giờ không? Bạn có thể tắt tùy chọn này trong Cài đặt của YouTube > %@ > %@.";

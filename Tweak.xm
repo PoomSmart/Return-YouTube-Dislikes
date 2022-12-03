@@ -4,6 +4,7 @@
 #import <HBLog.h>
 #import "Tweak.h"
 
+#define TWEAK_NAME @"Return YouTube Dislike"
 #define maxRetryCount 3
 #define apiUrl @"https://returnyoutubedislikeapi.com"
 #define UserIDKey @"RYD-USER-ID"
@@ -674,7 +675,7 @@ static void enableVoteSubmission(BOOL enabled) {
         }
         settingItemId:0];
     [sectionItems addObject:exact];
-    [delegate setSectionItems:sectionItems forCategory:RYDSection title:@"Return YouTube Dislike" titleDescription:nil headerHidden:NO];
+    [delegate setSectionItems:sectionItems forCategory:RYDSection title:TWEAK_NAME titleDescription:nil headerHidden:NO];
 }
 
 - (void)updateSectionForCategory:(NSUInteger)category withEntry:(id)entry {
@@ -698,7 +699,7 @@ static void enableVoteSubmission(BOOL enabled) {
                 enableVoteSubmission(YES);
             } actionTitle:_LOC([NSBundle mainBundle], @"settings.yes")];
             alertView.title = @"Return YouTube Dislike";
-            alertView.subtitle = [NSString stringWithFormat:LOC(@"WANT_TO_ENABLE"), apiUrl, LOC(@"ENABLE_VOTE_SUBMIT")];
+            alertView.subtitle = [NSString stringWithFormat:LOC(@"WANT_TO_ENABLE"), apiUrl, TWEAK_NAME, LOC(@"ENABLE_VOTE_SUBMIT")];
             [alertView show];
         });
     }
