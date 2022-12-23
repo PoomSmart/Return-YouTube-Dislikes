@@ -34,11 +34,8 @@ NSBundle *RYDBundle() {
         NSString *tweakBundlePath = [[NSBundle mainBundle] pathForResource:@"RYD" ofType:@"bundle"];
         if (tweakBundlePath)
             bundle = [NSBundle bundleWithPath:tweakBundlePath];
-        else {
+        else
             bundle = [NSBundle bundleWithPath:@"/Library/Application Support/RYD.bundle"];
-            if (!bundle)
-                bundle = [NSBundle bundleWithPath:@"/var/jb/Library/Application Support/RYD.bundle"];
-        }
     });
     return bundle;
 }
@@ -654,8 +651,13 @@ static void getVoteFromVideoWithHandler(NSString *videoId, int retryCount, void 
         return;
     }
     NSObject *wc = [vc valueForKey:@"_metadataPanelStateProvider"];
-    YTWatchPlaybackController *wpc = ((YTWatchController *)wc).watchPlaybackController;
-    YTPlayerViewController *pvc = [wpc valueForKey:@"_playerViewController"];
+    YTPlayerViewController *pvc;
+    @try {
+        YTWatchPlaybackController *wpc = ((YTWatchController *)wc).watchPlaybackController;
+        pvc = [wpc valueForKey:@"_playerViewController"];
+    } @catch (id ex) {
+        pvc = [wc valueForKey:@"_playerViewController"];
+    }
     NSString *videoId = [pvc currentVideoID];
     NSMutableAttributedString *mutableText = [[NSMutableAttributedString alloc] initWithAttributedString:candidate.attributedText];
     mutableText.mutableString.string = FETCHING;
