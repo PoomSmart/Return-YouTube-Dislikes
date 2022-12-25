@@ -27,6 +27,10 @@ static const NSInteger RYDSection = 1080;
 
 static NSCache <NSString *, NSDictionary *> *cache;
 
+ASNodeContext *(*ASNodeContextGet)(void);
+void (*ASNodeContextPush)(ASNodeContext *);
+void (*ASNodeContextPop)(void);
+
 NSBundle *RYDBundle() {
     static NSBundle *bundle = nil;
     static dispatch_once_t onceToken;
@@ -629,27 +633,30 @@ static void getVoteFromVideoWithHandler(NSString *videoId, int retryCount, void 
     if (![vc isKindOfClass:%c(YTWatchNextResultsViewController)]) {
         return;
     }
-    NSString *likeCount = nil;
-    if (node.yogaChildren.count != 2) {
-        _ASDisplayView *superview = (_ASDisplayView *)self.superview;
-        ELMContainerNode *snode = (ELMContainerNode *)superview.keepalive_node;
-        ELMContainerNode *likeNode = snode.yogaChildren[0];
-        if (![likeNode.accessibilityIdentifier isEqualToString:@"id.video.like.button"] || likeNode.yogaChildren.count < 2) {
-            return;
-        }
-        ELMTextNode *likeTextNode = likeNode.yogaChildren[1];
-        if (![likeTextNode isKindOfClass:%c(ELMTextNode)]) {
-            return;
-        }
-        likeCount = likeTextNode.attributedText.string;
-        NSMutableArray *newArray = [node.yogaChildren mutableCopy];
-        [newArray addObject:likeTextNode];
-        node.yogaChildren = newArray;
-    }
-    ELMTextNode *candidate = node.yogaChildren[1];
-    if (![candidate isKindOfClass:%c(ELMTextNode)]) {
+    if (node.yogaChildren.count < 1) {
         return;
     }
+    _ASDisplayView *superview = (_ASDisplayView *)self.superview;
+    ELMContainerNode *snode = (ELMContainerNode *)superview.keepalive_node;
+    ELMContainerNode *likeNode = snode.yogaChildren[0];
+    if (![likeNode.accessibilityIdentifier isEqualToString:@"id.video.like.button"] || likeNode.yogaChildren.count < 2) {
+        return;
+    }
+    ELMTextNode *likeTextNode = likeNode.yogaChildren[1];
+    if (![likeTextNode isKindOfClass:%c(ELMTextNode)]) {
+        return;
+    }
+    ASNodeContext *context = ASNodeContextGet();
+    if (!context) context = [(ASNodeContext *)[%c(ASNodeContext) alloc] initWithOptions:1];
+    ASNodeContextPush(context);
+    ELMTextNode *dislikeTextNode = [[%c(ELMTextNode) alloc] initWithElement:likeTextNode.element context:[likeTextNode valueForKey:@"_context"]];
+    NSMutableAttributedString *mutableDislikeText = [[NSMutableAttributedString alloc] initWithAttributedString:likeTextNode.attributedText];
+    dislikeTextNode.attributedText = mutableDislikeText;
+    NSMutableArray *newArray = [node.yogaChildren mutableCopy];
+    [newArray addObject:dislikeTextNode];
+    node.yogaChildren = newArray;
+    [node.view addSubview:dislikeTextNode.view];
+    ASNodeContextPop();
     NSObject *wc = [vc valueForKey:@"_metadataPanelStateProvider"];
     YTPlayerViewController *pvc;
     @try {
@@ -659,15 +666,20 @@ static void getVoteFromVideoWithHandler(NSString *videoId, int retryCount, void 
         pvc = [wc valueForKey:@"_playerViewController"];
     }
     NSString *videoId = [pvc currentVideoID];
-    NSMutableAttributedString *mutableText = [[NSMutableAttributedString alloc] initWithAttributedString:candidate.attributedText];
-    mutableText.mutableString.string = FETCHING;
-    candidate.attributedText = mutableText;
+    mutableDislikeText.mutableString.string = FETCHING;
+    dislikeTextNode.attributedText = mutableDislikeText;
     getVoteFromVideoWithHandler(videoId, maxRetryCount, ^(NSDictionary *data, NSString *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            NSString *finalLikeCount = ExactLikeNumber() ? formattedNumber(data[@"likes"], error) : likeCount;
+            if (ExactLikeNumber()) {
+                NSString *likeCount = formattedNumber(data[@"likes"], error);
+                NSMutableAttributedString *mutableLikeText = [[NSMutableAttributedString alloc] initWithAttributedString:likeTextNode.attributedText];
+                mutableLikeText.mutableString.string = likeCount;
+                likeTextNode.attributedText = mutableLikeText;
+            }
             NSString *dislikeCount = getNormalizedDislikes(data[@"dislikes"], error);
-            mutableText.mutableString.string = finalLikeCount ? [NSString stringWithFormat:@"%@ | %@", finalLikeCount, dislikeCount] : dislikeCount;
-            candidate.attributedText = mutableText;
+            mutableDislikeText.mutableString.string = [NSString stringWithFormat:@"  %@ ", dislikeCount];
+            dislikeTextNode.attributedText = mutableDislikeText;
+
         });
     });
 }
@@ -756,4 +768,12 @@ static void enableVoteSubmission(BOOL enabled) {
             [alertView show];
         });
     }
+    NSString *frameworkPath = [NSString stringWithFormat:@"%@/Frameworks/Module_Framework.framework/Module_Framework", NSBundle.mainBundle.bundlePath];
+    NSBundle *bundle = [NSBundle bundleWithPath:frameworkPath];
+    if (!bundle.loaded) [bundle load];
+    MSImageRef ref = MSGetImageByName([frameworkPath UTF8String]);
+    ASNodeContextGet = (ASNodeContext *(*)(void))MSFindSymbol(ref, "_ASNodeContextGet");
+    ASNodeContextPush = (void (*)(ASNodeContext *))MSFindSymbol(ref, "_ASNodeContextPush");
+    ASNodeContextPop = (void (*)(void))MSFindSymbol(ref, "_ASNodeContextPop");
+    %init;
 }

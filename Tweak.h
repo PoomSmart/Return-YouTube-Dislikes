@@ -17,4 +17,8 @@
 #import "../YouTubeHeader/YTWatchController.h"
 #import "../YouTubeHeader/ELMContainerNode.h"
 #import "../YouTubeHeader/ELMTextNode.h"
+#import "../YouTubeHeader/ELMNodeController.h"
+#import "../YouTubeHeader/ELMNodeFactory.h"
+#import "../YouTubeHeader/ASNodeContext.h"
 #import "../YouTubeHeader/_ASDisplayView.h"
+#import "../YouTubeHeader/UIView+AsyncDisplayKit.h"
