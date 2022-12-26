@@ -653,7 +653,6 @@ static void getVoteFromVideoWithHandler(NSString *videoId, int retryCount, void 
         if ([likeNode.accessibilityIdentifier isEqualToString:@"id.video.like.button"] && likeNode.yogaChildren.count == 2) {
             likeTextNode = likeNode.yogaChildren[1];
             if (![likeTextNode isKindOfClass:%c(ELMTextNode)]) {
-                NSLog(@"RYDRYD -1");
                 return;
             }
             ASNodeContext *context = ASNodeContextGet();
@@ -662,6 +661,7 @@ static void getVoteFromVideoWithHandler(NSString *videoId, int retryCount, void 
             dislikeTextNode = [[%c(ELMTextNode) alloc] initWithElement:likeTextNode.element context:[likeTextNode valueForKey:@"_context"]];
             mutableDislikeText = [[NSMutableAttributedString alloc] initWithAttributedString:likeTextNode.attributedText];
             dislikeTextNode.attributedText = mutableDislikeText;
+            dislikeTextNode.style.flexShrink = 1;
             NSMutableArray *newArray = [node.yogaChildren mutableCopy];
             [newArray addObject:dislikeTextNode];
             node.yogaChildren = newArray;
@@ -698,14 +698,18 @@ static void getVoteFromVideoWithHandler(NSString *videoId, int retryCount, void 
         dispatch_async(dispatch_get_main_queue(), ^{
             if (exactLikeNumber) {
                 NSString *likeCount = formattedNumber(data[@"likes"], error);
-                NSMutableAttributedString *mutableLikeText = [[NSMutableAttributedString alloc] initWithAttributedString:likeTextNode.attributedText];
-                mutableLikeText.mutableString.string = likeCount;
-                likeTextNode.attributedText = mutableLikeText;
+                if (likeCount) {
+                    NSMutableAttributedString *mutableLikeText = [[NSMutableAttributedString alloc] initWithAttributedString:likeTextNode.attributedText];
+                    mutableLikeText.mutableString.string = likeCount;
+                    likeTextNode.attributedText = mutableLikeText;
+                    likeTextNode.accessibilityLabel = likeCount; 
+                }
             }
             if (mode == 0) {
                 NSString *dislikeCount = getNormalizedDislikes(data[@"dislikes"], error);
                 mutableDislikeText.mutableString.string = pair ? [NSString stringWithFormat:@"  %@ ", dislikeCount] : dislikeCount;
                 dislikeTextNode.attributedText = mutableDislikeText;
+                dislikeTextNode.accessibilityLabel = dislikeCount;
             }
 
         });
