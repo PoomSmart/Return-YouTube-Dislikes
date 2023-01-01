@@ -22,3 +22,7 @@
 #import "../YouTubeHeader/ASNodeContext.h"
 #import "../YouTubeHeader/_ASDisplayView.h"
 #import "../YouTubeHeader/UIView+AsyncDisplayKit.h"
+
+@interface ELMTextNode (RYD)
+@property (assign) BOOL blockUpdate;
+@end

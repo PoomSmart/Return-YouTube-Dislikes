@@ -1,4 +1,5 @@
 // Settings
+"ENABLED" = "Engedélyezve";
 "ENABLE_VOTE_SUBMIT" = "Szavazatküldés engedélyezése";
 "ENABLE_VOTE_SUBMIT_DESC" = "Engedélyezze egyedi névtelen azonosítójának és videóinak/rövidfilmjének tetszésnyilvánítási/nemtetszési adatainak elküldését a %@ címre.";
 "EXACT_LIKE_NUMBER" = "Exact like numbers";

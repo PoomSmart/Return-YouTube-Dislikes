@@ -1,4 +1,5 @@
 // Settings
+"ENABLED" = "Enabled";
 "ENABLE_VOTE_SUBMIT" = "Activați trimiterea voturilor";
 "ENABLE_VOTE_SUBMIT_DESC" = "Permiteți ca ID-ul dvs. unic anonim și datele despre apreciez/nu apreciez și video/shorts să fie trimise către %@.";
 "EXACT_LIKE_NUMBER" = "Exact like numbers";

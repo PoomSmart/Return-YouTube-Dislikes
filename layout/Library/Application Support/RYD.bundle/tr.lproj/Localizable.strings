@@ -1,4 +1,5 @@
 // Settings
+"ENABLED" = "Etkinleştir";
 "ENABLE_VOTE_SUBMIT" = "Oy gönderimini etkinleştir";
 "ENABLE_VOTE_SUBMIT_DESC" = "Benzersiz anonim kimliğinizin ve video/short beğeni/beğenmeme verilerinizin şu adrese gönderilmesine izin verin %@.";
 "EXACT_LIKE_NUMBER" = "Exact like numbers";

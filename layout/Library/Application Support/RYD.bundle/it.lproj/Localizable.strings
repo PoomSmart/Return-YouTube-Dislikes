@@ -1,4 +1,5 @@
 // Settings
+"ENABLED" = "Enabled";
 "ENABLE_VOTE_SUBMIT" = "Attiva invio voti";
 "ENABLE_VOTE_SUBMIT_DESC" = "Permette l'invio dei dati relativi al tuo ID univoco anonimizzato e ai mi piace/non mi piace sui video/shorts a %@.";
 "EXACT_LIKE_NUMBER" = "Exact like numbers";
