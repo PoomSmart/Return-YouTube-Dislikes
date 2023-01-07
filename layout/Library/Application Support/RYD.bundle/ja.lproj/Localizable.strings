@@ -1,6 +1,10 @@
 // Settings
+"ENABLED" = "有効";
 "ENABLE_VOTE_SUBMIT" = "評価の送信を許可";
 "ENABLE_VOTE_SUBMIT_DESC" = "固有の匿名IDと動画/ショートの高評価/低評価のデータを %@ に送信することを許可します。";
+"EXACT_LIKE_NUMBER" = "Exact like numbers";
+"EXACT_DISLIKE_NUMBER" = "Exact dislike numbers";
+"EXACT_DISLIKE_NUMBER_DESC" = "Display exact number of dislikes. For example: %@ -> %@.";
 
 // On app launch 
-"WANT_TO_ENABLE" = "高評価/低評価のデータを %@ に送信することを許可しますか？後から設定 > 全般 > %@ で無効にすることができます。";
+"WANT_TO_ENABLE" = "高評価/低評価のデータを %@ に送信することを許可しますか？後から設定 > %@ > %@ で無効にすることができます。";
