@@ -29,7 +29,6 @@ static const NSInteger RYDSection = 1080;
 
 static NSCache <NSString *, NSDictionary *> *cache;
 
-ASNodeContext *(*ASNodeContextGet)(void);
 void (*ASNodeContextPush)(ASNodeContext *);
 void (*ASNodeContextPop)(void);
 
@@ -170,8 +169,11 @@ static void fetch(
         NSError *error = nil;
         NSData *data = [NSJSONSerialization dataWithJSONObject:body options:NSJSONWritingPrettyPrinted error:&error];
         if (error) {
-            if (dataErrorHandler)
-                dataErrorHandler();
+            if (dataErrorHandler) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    dataErrorHandler();
+                });
+            }
             return;
         }
         HBLogDebug(@"fetch() POST body: %@", [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil]);
@@ -187,19 +189,27 @@ static void fetch(
         }
         if (error || responseCode != 200) {
             HBLogDebug(@"fetch() error requesting: %@ (%lu)", error, responseCode);
-            if (networkErrorHandler)
-                networkErrorHandler();
+            if (networkErrorHandler) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    networkErrorHandler();
+                });
+            }
             return;
         }
         NSError *jsonError;
         NSDictionary *myData = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingFragmentsAllowed error:&jsonError];
         if (jsonError) {
             HBLogDebug(@"fetch() error decoding response: %@", jsonError);
-            if (dataErrorHandler)
-                dataErrorHandler();
+            if (dataErrorHandler) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    dataErrorHandler();
+                });
+            }
             return;
         }
-        dataHandler(myData);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            dataHandler(myData);
+        });
     }] resume];
 }
 
@@ -473,8 +483,8 @@ static void getVoteFromVideoWithHandler(NSString *videoId, int retryCount, void 
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if ([renderer slimButton_isDislikeButton])
                         [self.label setFormattedString:[%c(YTIFormattedString) formattedStringWithString:getNormalizedDislikes(data[@"dislikes"], error)]];
-                    else if ([renderer slimButton_isLikeButton])
-                        [self.label setFormattedString:[%c(YTIFormattedString) formattedStringWithString:formattedLongNumber(data[@"likes"], error)]];
+                    else if ([renderer slimButton_isLikeButton] && error == nil)
+                        [self.label setFormattedString:[%c(YTIFormattedString) formattedStringWithString:formattedLongNumber(data[@"likes"], nil)]];
                     [self setNeedsLayout];
                 });
             });
@@ -584,10 +594,10 @@ static void getVoteFromVideoWithHandler(NSString *videoId, int retryCount, void 
                 [dislikeButton setTitle:[renderer.dislikeCountWithDislikeText stringWithFormattingRemoved] forState:UIControlStateSelected];
             }
         });
-        if (ExactLikeNumber()) {
+        if (ExactLikeNumber() && error == nil) {
             YTQTMButton *likeButton = self.likeButton;
-            NSString *formattedLikeCount = formattedLongNumber(data[@"likes"], error);
-            NSString *formattedToggledLikeCount = getNormalizedDislikes(@([data[@"likes"] unsignedIntegerValue] + 1), error);
+            NSString *formattedLikeCount = formattedLongNumber(data[@"likes"], nil);
+            NSString *formattedToggledLikeCount = getNormalizedDislikes(@([data[@"likes"] unsignedIntegerValue] + 1), nil);
             YTIFormattedString *formattedText = [%c(YTIFormattedString) formattedStringWithString:formattedLikeCount];
             YTIFormattedString *formattedToggledText = [%c(YTIFormattedString) formattedStringWithString:formattedToggledLikeCount];
             if (renderer.hasLikeCountText)
@@ -665,15 +675,12 @@ static void getVoteFromVideoWithHandler(NSString *videoId, int retryCount, void 
         if ([likeNode.accessibilityIdentifier isEqualToString:@"id.video.like.button"] && likeNode.yogaChildren.count == 2) {
             likeTextNode = likeNode.yogaChildren[1];
             if (![likeTextNode isKindOfClass:%c(ELMTextNode)]) return;
-            ASNodeContext *context = ASNodeContextGet();
-            if (!context) context = [(ASNodeContext *)[%c(ASNodeContext) alloc] initWithOptions:1];
+            ASNodeContext *context = [(ASNodeContext *)[%c(ASNodeContext) alloc] initWithOptions:1];
             ASNodeContextPush(context);
             dislikeTextNode = [[%c(ELMTextNode) alloc] initWithElement:likeTextNode.element context:[likeTextNode valueForKey:@"_context"]];
             ASNodeContextPop();
             mutableDislikeText = [[NSMutableAttributedString alloc] initWithAttributedString:likeTextNode.attributedText];
             dislikeTextNode.attributedText = mutableDislikeText;
-            // dislikeTextNode.style.flexShrink = 1;
-            // dislikeTextNode.layerBacked = YES;
             [node addYogaChild:dislikeTextNode];
             dislikeTextNode.blockUpdate = YES;
             [self addSubview:dislikeTextNode.view];
@@ -702,8 +709,8 @@ static void getVoteFromVideoWithHandler(NSString *videoId, int retryCount, void 
     }
     getVoteFromVideoWithHandler(videoId, maxRetryCount, ^(NSDictionary *data, NSString *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            if (exactLikeNumber) {
-                NSString *likeCount = formattedLongNumber(data[@"likes"], error);
+            if (exactLikeNumber && error == nil) {
+                NSString *likeCount = formattedLongNumber(data[@"likes"], nil);
                 if (likeCount) {
                     NSMutableAttributedString *mutableLikeText = [[NSMutableAttributedString alloc] initWithAttributedString:likeTextNode.attributedText];
                     mutableLikeText.mutableString.string = likeCount;
@@ -819,7 +826,6 @@ static void enableVoteSubmission(BOOL enabled) {
     NSBundle *bundle = [NSBundle bundleWithPath:frameworkPath];
     if (!bundle.loaded) [bundle load];
     MSImageRef ref = MSGetImageByName([frameworkPath UTF8String]);
-    ASNodeContextGet = (ASNodeContext *(*)(void))MSFindSymbol(ref, "_ASNodeContextGet");
     ASNodeContextPush = (void (*)(ASNodeContext *))MSFindSymbol(ref, "_ASNodeContextPush");
     ASNodeContextPop = (void (*)(void))MSFindSymbol(ref, "_ASNodeContextPop");
     %init;
