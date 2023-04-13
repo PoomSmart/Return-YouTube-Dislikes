@@ -2,6 +2,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <HBLog.h>
+#import <rootless.h>
 #import "unicode/unum.h"
 #import "Tweak.h"
 
@@ -40,7 +41,7 @@ NSBundle *RYDBundle() {
         if (tweakBundlePath)
             bundle = [NSBundle bundleWithPath:tweakBundlePath];
         else
-            bundle = [NSBundle bundleWithPath:@"/Library/Application Support/RYD.bundle"];
+            bundle = [NSBundle bundleWithPath:ROOT_PATH_NS(@"/Library/Application Support/RYD.bundle")];
     });
     return bundle;
 }
