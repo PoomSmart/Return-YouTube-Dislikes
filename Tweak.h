@@ -9,6 +9,8 @@
 #import "../YouTubeHeader/YTISlimMetadataButtonSupportedRenderers.h"
 #import "../YouTubeHeader/YTILikeButtonRenderer.h"
 #import "../YouTubeHeader/YTReelWatchLikesController.h"
+#import "../YouTubeHeader/YTRollingNumberNode.h"
+#import "../YouTubeHeader/YTRollingNumberView.h"
 #import "../YouTubeHeader/YTSettingsCell.h"
 #import "../YouTubeHeader/YTSettingsSectionItem.h"
 #import "../YouTubeHeader/YTSettingsSectionItemManager.h"
@@ -25,4 +27,10 @@
 
 @interface ELMTextNode (RYD)
 @property (assign) BOOL blockUpdate;
+@end
+
+@interface YTRollingNumberNode (RYD)
+@property (assign) int alterMode;
+@property (strong, nonatomic) NSString *updatedCount;
+@property (strong, nonatomic) NSNumber *updatedCountNumber;
 @end

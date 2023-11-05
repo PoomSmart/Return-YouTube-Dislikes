@@ -656,7 +656,6 @@ static void getVoteFromVideoWithHandler(NSString *videoId, int retryCount, void 
     if (!TweakEnabled()) return;
     int mode = 0;
     BOOL pair = NO;
-    BOOL exactLikeNumber = ExactLikeNumber();
     ELMContainerNode *node = (ELMContainerNode *)self.keepalive_node;
     if (![node.accessibilityIdentifier isEqualToString:@"id.video.dislike.button"]) {
         if (![node.accessibilityIdentifier isEqualToString:@"id.video.like.button"])
@@ -666,34 +665,54 @@ static void getVoteFromVideoWithHandler(NSString *videoId, int retryCount, void 
     UIViewController *vc = [node closestViewController];
     if (![vc isKindOfClass:%c(YTWatchNextResultsViewController)]) return;
     if (node.yogaChildren.count < 1) return;
+    id targetNode = nil;
     ELMTextNode *likeTextNode = nil;
+    YTRollingNumberNode *likeRollingNumberNode = nil;
     ELMTextNode *dislikeTextNode = nil;
+    YTRollingNumberNode *dislikeRollingNumberNode = nil;
     NSMutableAttributedString *mutableDislikeText = nil;
     if (mode == 0) {
         _ASDisplayView *superview = (_ASDisplayView *)self.superview;
         ELMContainerNode *snode = (ELMContainerNode *)superview.keepalive_node;
         ELMContainerNode *likeNode = snode.yogaChildren[0];
         if ([likeNode.accessibilityIdentifier isEqualToString:@"id.video.like.button"] && likeNode.yogaChildren.count == 2) {
-            likeTextNode = likeNode.yogaChildren[1];
-            if (![likeTextNode isKindOfClass:%c(ELMTextNode)]) return;
-            ASNodeContext *context = [(ASNodeContext *)[%c(ASNodeContext) alloc] initWithOptions:1];
-            ASNodeContextPush(context);
-            dislikeTextNode = [[%c(ELMTextNode) alloc] initWithElement:likeTextNode.element context:[likeTextNode valueForKey:@"_context"]];
-            ASNodeContextPop();
-            mutableDislikeText = [[NSMutableAttributedString alloc] initWithAttributedString:likeTextNode.attributedText];
-            dislikeTextNode.attributedText = mutableDislikeText;
-            [node addYogaChild:dislikeTextNode];
-            dislikeTextNode.blockUpdate = YES;
-            [self addSubview:dislikeTextNode.view];
-            pair = YES;
+            targetNode = likeNode.yogaChildren[1];
+            if ([targetNode isKindOfClass:%c(YTRollingNumberNode)]) {
+                likeRollingNumberNode = (YTRollingNumberNode *)targetNode;
+                ASNodeContext *context = [(ASNodeContext *)[%c(ASNodeContext) alloc] initWithOptions:1];
+                ASNodeContextPush(context);
+                dislikeRollingNumberNode = [[%c(YTRollingNumberNode) alloc] initWithElement:likeRollingNumberNode.element context:[likeRollingNumberNode valueForKey:@"_context"]];
+                ASNodeContextPop();
+                dislikeRollingNumberNode.alterMode = 1;
+                [node addYogaChild:dislikeRollingNumberNode];
+                [self addSubview:dislikeRollingNumberNode.view];
+            } else if ([targetNode isKindOfClass:%c(ELMTextNode)]) {
+                likeTextNode = (ELMTextNode *)targetNode;
+                ASNodeContext *context = [(ASNodeContext *)[%c(ASNodeContext) alloc] initWithOptions:1];
+                ASNodeContextPush(context);
+                dislikeTextNode = [[%c(ELMTextNode) alloc] initWithElement:likeTextNode.element context:[likeTextNode valueForKey:@"_context"]];
+                ASNodeContextPop();
+                mutableDislikeText = [[NSMutableAttributedString alloc] initWithAttributedString:likeTextNode.attributedText];
+                dislikeTextNode.attributedText = mutableDislikeText;
+                [node addYogaChild:dislikeTextNode];
+                dislikeTextNode.blockUpdate = YES;
+                [self addSubview:dislikeTextNode.view];
+                pair = YES;
+            }
         } else {
             dislikeTextNode = node.yogaChildren[1];
             if (![dislikeTextNode isKindOfClass:%c(ELMTextNode)]) return;
             mutableDislikeText = [[NSMutableAttributedString alloc] initWithAttributedString:dislikeTextNode.attributedText];
         }
     } else {
-        likeTextNode = node.yogaChildren[1];
-        if (![likeTextNode isKindOfClass:%c(ELMTextNode)]) return;
+        targetNode = node.yogaChildren[1];
+        if ([targetNode isKindOfClass:%c(YTRollingNumberNode)]) {
+            likeRollingNumberNode = (YTRollingNumberNode *)targetNode;
+            likeRollingNumberNode.alterMode = 2;
+        }
+        else if ([targetNode isKindOfClass:%c(ELMTextNode)])
+            likeTextNode = (ELMTextNode *)targetNode;
+        else return;
     }
     NSObject *wc = [vc valueForKey:@"_metadataPanelStateProvider"];
     YTPlayerViewController *pvc;
@@ -704,30 +723,67 @@ static void getVoteFromVideoWithHandler(NSString *videoId, int retryCount, void 
         pvc = [wc valueForKey:@"_playerViewController"];
     }
     NSString *videoId = [pvc currentVideoID];
-    if (mode == 0) {
+    if (mode == 0 && dislikeTextNode) {
         mutableDislikeText.mutableString.string = FETCHING;
         dislikeTextNode.attributedText = mutableDislikeText;
     }
     getVoteFromVideoWithHandler(videoId, maxRetryCount, ^(NSDictionary *data, NSString *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            if (exactLikeNumber && error == nil) {
-                NSString *likeCount = formattedLongNumber(data[@"likes"], nil);
+            if (ExactLikeNumber() && error == nil) {
+                NSNumber *likeNumber = data[@"likes"];
+                NSString *likeCount = formattedLongNumber(likeNumber, nil);
                 if (likeCount) {
-                    NSMutableAttributedString *mutableLikeText = [[NSMutableAttributedString alloc] initWithAttributedString:likeTextNode.attributedText];
-                    mutableLikeText.mutableString.string = likeCount;
-                    likeTextNode.attributedText = mutableLikeText;
-                    likeTextNode.accessibilityLabel = likeCount; 
+                    if (likeRollingNumberNode) {
+                        likeRollingNumberNode.updatedCount = likeCount;
+                        likeRollingNumberNode.updatedCountNumber = likeNumber;
+                        [likeRollingNumberNode updateRollingNumberView];
+                        [likeRollingNumberNode relayoutNode];
+                    } else {
+                        NSMutableAttributedString *mutableLikeText = [[NSMutableAttributedString alloc] initWithAttributedString:likeTextNode.attributedText];
+                        mutableLikeText.mutableString.string = likeCount;
+                        likeTextNode.attributedText = mutableLikeText;
+                        likeTextNode.accessibilityLabel = likeCount;
+                    }
                 }
             }
             if (mode == 0) {
-                NSString *dislikeCount = getNormalizedDislikes(data[@"dislikes"], error);
-                mutableDislikeText.mutableString.string = pair ? [NSString stringWithFormat:@"  %@ ", dislikeCount] : dislikeCount;
-                dislikeTextNode.attributedText = mutableDislikeText;
-                dislikeTextNode.accessibilityLabel = dislikeCount;
+                NSNumber *dislikeNumber = data[@"dislikes"];
+                NSString *dislikeCount = getNormalizedDislikes(dislikeNumber, error);
+                NSString *dislikeString = pair ? [NSString stringWithFormat:@"  %@ ", dislikeCount] : dislikeCount;
+                if (dislikeRollingNumberNode) {
+                    dislikeRollingNumberNode.updatedCount = dislikeString;
+                    dislikeRollingNumberNode.updatedCountNumber = dislikeNumber;
+                    [dislikeRollingNumberNode updateRollingNumberView];
+                    [dislikeRollingNumberNode relayoutNode];
+                } else {
+                    mutableDislikeText.mutableString.string = dislikeString;
+                    dislikeTextNode.attributedText = mutableDislikeText;
+                    dislikeTextNode.accessibilityLabel = dislikeCount;
+                }
             }
         });
     });
 }
+
+%end
+
+%hook YTRollingNumberNode
+
+%property (assign) int alterMode;
+%property (strong, nonatomic) NSString *updatedCount;
+%property (strong, nonatomic) NSNumber *updatedCountNumber;
+
+- (void)updateRollingNumberView {
+    %orig;
+    if ((self.alterMode == 1 || self.alterMode == 2) && (self.updatedCount && self.updatedCountNumber)) {
+        YTRollingNumberView *view = [self valueForKey:@"_rollingNumberView"];
+        UIFont *font = [view font];
+        UIColor *color = [view color];
+        [view setUpdatedCount:self.updatedCount updatedCountNumber:self.updatedCountNumber font:font color:color skipAnimation:YES];
+    }
+}
+
+- (void)controllerDidApplyProperties {}
 
 %end
 
@@ -808,6 +864,30 @@ static void enableVoteSubmission(BOOL enabled) {
 
 %end
 
+// %group ForceLegacy
+
+// BOOL loadWatchNextRequest = NO;
+
+// %hook YTVersionUtils
+
+// + (NSString *)appVersion {
+//     return loadWatchNextRequest && TweakEnabled() ? @"16.46.5" : %orig;
+// }
+
+// %end
+
+// %hook YTWatchNextViewController
+
+// - (void)loadWatchNextRequest:(id)arg1 withInitialWatchNextResponse:(id)arg2 disableUnloadModel:(BOOL)arg3 {
+//     loadWatchNextRequest = YES;
+//     %orig;
+//     loadWatchNextRequest = NO;
+// }
+
+// %end
+
+// %end
+
 %ctor {
     cache = [NSCache new];
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -830,4 +910,7 @@ static void enableVoteSubmission(BOOL enabled) {
     ASNodeContextPush = (void (*)(ASNodeContext *))MSFindSymbol(ref, "_ASNodeContextPush");
     ASNodeContextPop = (void (*)(void))MSFindSymbol(ref, "_ASNodeContextPop");
     %init;
+    // if (!IS_IOS_OR_NEWER(iOS_13_0)) {
+    //     %init(ForceLegacy);
+    // }
 }
