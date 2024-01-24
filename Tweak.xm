@@ -851,7 +851,10 @@ static void enableVoteSubmission(BOOL enabled) {
         }
         settingItemId:0];
     [sectionItems addObject:exactLike];
-    [delegate setSectionItems:sectionItems forCategory:RYDSection title:TWEAK_NAME titleDescription:nil headerHidden:NO];
+    if ([delegate respondsToSelector:@selector(setSectionItems:forCategory:title:icon:titleDescription:headerHidden:)])
+        [delegate setSectionItems:sectionItems forCategory:RYDSection title:TWEAK_NAME icon:nil titleDescription:nil headerHidden:NO];
+    else
+        [delegate setSectionItems:sectionItems forCategory:RYDSection title:TWEAK_NAME titleDescription:nil headerHidden:NO];
 }
 
 - (void)updateSectionForCategory:(NSUInteger)category withEntry:(id)entry {
