@@ -787,6 +787,11 @@ static void getVoteFromVideoWithHandler(NSString *videoId, int retryCount, void 
 
 %end
 
+// Disable chips fading animation under player
+%hook YTWatchNextResultsViewController
+- (void)maybeEnableFadingChipsHeaderInCollectionView { }
+%end
+
 static void enableVoteSubmission(BOOL enabled) {
     [[NSUserDefaults standardUserDefaults] setBool:enabled forKey:EnableVoteSubmissionKey];
 }
