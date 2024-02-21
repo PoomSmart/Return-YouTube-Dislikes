@@ -12,8 +12,8 @@ The tweak also provides an option to submit your like/dislike data to their RYD 
 
 - Clone this project (of course).
 - Use latest [Theos](https://github.com/theos/theos).
-- Have [YouTubeHeader](https://github.com/PoomSmart/YouTubeHeader) cloned alongside this project.
-- Run `make` or `make package FINALPACKAGE=1` in your Terminal.
+- Clone [YouTubeHeader](https://github.com/PoomSmart/YouTubeHeader) to `$THEOS/include/YouTubeHeader`.
+- Run `make` or `make package FINALPACKAGE=1` or `make package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless` in your Terminal.
 
 ## Credits
 
