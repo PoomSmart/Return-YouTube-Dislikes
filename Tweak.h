@@ -11,10 +11,6 @@
 #import <YouTubeHeader/YTReelWatchLikesController.h>
 #import <YouTubeHeader/YTRollingNumberNode.h>
 #import <YouTubeHeader/YTRollingNumberView.h>
-#import <YouTubeHeader/YTSettingsCell.h>
-#import <YouTubeHeader/YTSettingsSectionItem.h>
-#import <YouTubeHeader/YTSettingsSectionItemManager.h>
-#import <YouTubeHeader/YTSettingsViewController.h>
 #import <YouTubeHeader/YTPlayerViewController.h>
 #import <YouTubeHeader/YTWatchController.h>
 #import <YouTubeHeader/ELMContainerNode.h>
