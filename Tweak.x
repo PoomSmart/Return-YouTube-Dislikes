@@ -356,8 +356,12 @@ static void getVoteFromVideoWithHandler(NSString *videoId, int retryCount, void 
                 dislikeRollingNumberNode = [[%c(YTRollingNumberNode) alloc] initWithElement:likeRollingNumberNode.element context:[likeRollingNumberNode valueForKey:@"_context"]];
                 ASNodeContextPop();
                 dislikeRollingNumberNode.alterMode = 1;
+                dislikeRollingNumberNode.updatedCount = FETCHING;
+                dislikeRollingNumberNode.updatedCountNumber = @(0);
+                [dislikeRollingNumberNode updateRollingNumberView];
                 [node addYogaChild:dislikeRollingNumberNode];
                 [self addSubview:dislikeRollingNumberNode.view];
+                pair = YES;
             } else if ([targetNode isKindOfClass:%c(ELMTextNode)]) {
                 likeTextNode = (ELMTextNode *)targetNode;
                 ASNodeContext *context = [(ASNodeContext *)[%c(ASNodeContext) alloc] initWithOptions:1];
@@ -451,7 +455,7 @@ static void getVoteFromVideoWithHandler(NSString *videoId, int retryCount, void 
         YTRollingNumberView *view = [self valueForKey:@"_rollingNumberView"];
         UIFont *font = [view font];
         UIColor *color = [view color];
-        [view setUpdatedCount:self.updatedCount updatedCountNumber:self.updatedCountNumber font:font color:color skipAnimation:YES];
+        [view setUpdatedCount:[NSString stringWithFormat:@" %@", self.updatedCount] updatedCountNumber:self.updatedCountNumber font:font color:color skipAnimation:YES];
     }
 }
 
