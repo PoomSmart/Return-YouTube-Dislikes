@@ -4,6 +4,7 @@
 #import <YouTubeHeader/YTSettingsViewController.h>
 #import <rootless.h>
 #import "Settings.h"
+#import "TweakSettings.h"
 
 static const NSInteger RYDSection = 1080;
 
@@ -22,26 +23,6 @@ NSBundle *RYDBundle() {
             bundle = [NSBundle bundleWithPath:ROOT_PATH_NS(@"/Library/Application Support/RYD.bundle")];
     });
     return bundle;
-}
-
-BOOL TweakEnabled() {
-    return [[NSUserDefaults standardUserDefaults] boolForKey:EnabledKey];
-}
-
-BOOL VoteSubmissionEnabled() {
-    return [[NSUserDefaults standardUserDefaults] boolForKey:EnableVoteSubmissionKey];
-}
-
-BOOL ExactLikeNumber() {
-    return [[NSUserDefaults standardUserDefaults] boolForKey:ExactLikeKey];
-}
-
-BOOL ExactDislikeNumber() {
-    return [[NSUserDefaults standardUserDefaults] boolForKey:ExactDislikeKey];
-}
-
-void enableVoteSubmission(BOOL enabled) {
-    [[NSUserDefaults standardUserDefaults] setBool:enabled forKey:EnableVoteSubmissionKey];
 }
 
 %hook YTAppSettingsPresentationData
