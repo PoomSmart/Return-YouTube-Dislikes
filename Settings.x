@@ -4,7 +4,6 @@
 #import <YouTubeHeader/YTSettingsViewController.h>
 #import <rootless.h>
 #import "Settings.h"
-#import "Global.h"
 
 static const NSInteger RYDSection = 1080;
 
@@ -76,7 +75,7 @@ void enableVoteSubmission(BOOL enabled) {
         settingItemId:0];
     [sectionItems addObject:enabled];
     YTSettingsSectionItem *vote = [%c(YTSettingsSectionItem) switchItemWithTitle:LOC(@"ENABLE_VOTE_SUBMIT")
-        titleDescription:[NSString stringWithFormat:LOC(@"ENABLE_VOTE_SUBMIT_DESC"), apiUrl]
+        titleDescription:[NSString stringWithFormat:LOC(@"ENABLE_VOTE_SUBMIT_DESC"), @(API_URL)]
         accessibilityIdentifier:nil
         switchOn:VoteSubmissionEnabled()
         switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
@@ -106,9 +105,9 @@ void enableVoteSubmission(BOOL enabled) {
         settingItemId:0];
     [sectionItems addObject:exactLike];
     if ([delegate respondsToSelector:@selector(setSectionItems:forCategory:title:icon:titleDescription:headerHidden:)])
-        [delegate setSectionItems:sectionItems forCategory:RYDSection title:TWEAK_NAME icon:nil titleDescription:nil headerHidden:NO];
+        [delegate setSectionItems:sectionItems forCategory:RYDSection title:@(TWEAK_NAME) icon:nil titleDescription:nil headerHidden:NO];
     else
-        [delegate setSectionItems:sectionItems forCategory:RYDSection title:TWEAK_NAME titleDescription:nil headerHidden:NO];
+        [delegate setSectionItems:sectionItems forCategory:RYDSection title:@(TWEAK_NAME) titleDescription:nil headerHidden:NO];
 }
 
 - (void)updateSectionForCategory:(NSUInteger)category withEntry:(id)entry {

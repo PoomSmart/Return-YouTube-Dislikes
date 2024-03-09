@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 #import <HBLog.h>
-#import "Global.h"
+#import "API.h"
 #import "Settings.h"
 #import "Tweak.h"
 #import "unicode/unum.h"
@@ -21,17 +21,6 @@ extern BOOL ExactDislikeNumber();
 extern void enableVoteSubmission(BOOL enabled);
 
 extern NSBundle *RYDBundle();
-
-extern void sendVote(NSString *videoId, YTLikeStatus s);
-extern void fetch(
-    NSString *endpoint,
-    NSString *method,
-    NSDictionary *body,
-    void (^dataHandler)(NSDictionary *data),
-    BOOL (^responseCodeHandler)(NSUInteger responseCode),
-    void (^networkErrorHandler)(void),
-    void (^dataErrorHandler)(void)
-);
 
 static NSString *formattedLongNumber(NSNumber *number, NSString *error) {
     return error ?: [NSNumberFormatter localizedStringFromNumber:number numberStyle:NSNumberFormatterDecimalStyle];
@@ -327,7 +316,6 @@ static void getVoteFromVideoWithHandler(NSString *videoId, int retryCount, void 
     %orig;
     if (!TweakEnabled()) return;
     int mode = 0;
-    BOOL pair = NO;
     ELMContainerNode *node = (ELMContainerNode *)self.keepalive_node;
     if (![node.accessibilityIdentifier isEqualToString:@"id.video.dislike.button"]) {
         if (![node.accessibilityIdentifier isEqualToString:@"id.video.like.button"])
@@ -337,6 +325,7 @@ static void getVoteFromVideoWithHandler(NSString *videoId, int retryCount, void 
     UIViewController *vc = [node closestViewController];
     if (![vc isKindOfClass:%c(YTWatchNextResultsViewController)]) return;
     if (node.yogaChildren.count < 1) return;
+    BOOL pair = NO;
     id targetNode = nil;
     ELMTextNode *likeTextNode = nil;
     YTRollingNumberNode *likeRollingNumberNode = nil;
@@ -497,8 +486,8 @@ static void getVoteFromVideoWithHandler(NSString *videoId, int retryCount, void 
             YTAlertView *alertView = [%c(YTAlertView) confirmationDialogWithAction:^{
                 enableVoteSubmission(YES);
             } actionTitle:_LOC([NSBundle mainBundle], @"settings.yes")];
-            alertView.title = TWEAK_NAME;
-            alertView.subtitle = [NSString stringWithFormat:LOC(@"WANT_TO_ENABLE"), apiUrl, TWEAK_NAME, LOC(@"ENABLE_VOTE_SUBMIT")];
+            alertView.title = @(TWEAK_NAME);
+            alertView.subtitle = [NSString stringWithFormat:LOC(@"WANT_TO_ENABLE"), @(API_URL), TWEAK_NAME, LOC(@"ENABLE_VOTE_SUBMIT")];
             [alertView show];
         });
     }

@@ -1,7 +1,6 @@
 #import <CommonCrypto/CommonDigest.h>
 #import <YouTubeHeader/YTLikeStatus.h>
 #import <HBLog.h>
-#import "Global.h"
 #import "Settings.h"
 
 static NSString *getUserID() {
@@ -92,7 +91,7 @@ void fetch(
     void (^networkErrorHandler)(void),
     void (^dataErrorHandler)(void)
 ) {
-    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@", apiUrl, endpoint]];
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@", @(API_URL), endpoint]];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
     NSMutableURLRequest *urlRequest = [NSMutableURLRequest requestWithURL:url];
     urlRequest.HTTPMethod = method;
