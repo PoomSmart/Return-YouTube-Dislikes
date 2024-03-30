@@ -284,7 +284,12 @@ extern NSBundle *RYDBundle();
     if ([vc isKindOfClass:%c(YTShortsPlayerViewController)])
         pvc = ((YTShortsPlayerViewController *)vc).player;
     else {
-        NSObject *wc = [vc valueForKey:@"_metadataPanelStateProvider"];
+        NSObject *wc;
+        @try {
+            wc = [vc valueForKey:@"_metadataPanelStateProvider"];
+        } @catch (id ex) {
+            wc = [vc valueForKey:@"_ngwMetadataPanelStateProvider"];
+        }
         @try {
             YTWatchPlaybackController *wpc = ((YTWatchController *)wc).watchPlaybackController;
             pvc = [wpc valueForKey:@"_playerViewController"];

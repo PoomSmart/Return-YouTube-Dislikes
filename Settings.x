@@ -66,7 +66,7 @@ NSBundle *RYDBundle() {
         settingItemId:0];
     [sectionItems addObject:vote];
     YTSettingsSectionItem *exactDislike = [%c(YTSettingsSectionItem) switchItemWithTitle:LOC(@"EXACT_DISLIKE_NUMBER")
-        titleDescription:[NSString stringWithFormat:LOC(@"EXACT_DISLIKE_NUMBER_DESC"), @"12345", [NSNumberFormatter localizedStringFromNumber:@(12345) numberStyle:NSNumberFormatterDecimalStyle]]
+        titleDescription:[NSString stringWithFormat:LOC(@"EXACT_DISLIKE_NUMBER_DESC"), @"12.3K", [NSNumberFormatter localizedStringFromNumber:@(12345) numberStyle:NSNumberFormatterDecimalStyle]]
         accessibilityIdentifier:nil
         switchOn:ExactDislikeNumber()
         switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
