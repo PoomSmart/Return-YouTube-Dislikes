@@ -352,9 +352,13 @@ extern NSBundle *RYDBundle();
     %orig;
     if ((self.alterMode == 1 || self.alterMode == 2) && (self.updatedCount && self.updatedCountNumber)) {
         YTRollingNumberView *view = [self valueForKey:@"_rollingNumberView"];
-        UIFont *font = [view font];
-        UIColor *color = [view color];
-        [view setUpdatedCount:[NSString stringWithFormat:@" %@", self.updatedCount] updatedCountNumber:self.updatedCountNumber font:font color:color skipAnimation:YES];
+        UIFont *font = view.font;
+        UIColor *color = view.color;
+        NSString *updatedCount = [NSString stringWithFormat:@" %@", self.updatedCount];
+        if ([view respondsToSelector:@selector(setUpdatedCount:updatedCountNumber:font:fontAttributes:color:skipAnimation:)])
+            [view setUpdatedCount:updatedCount updatedCountNumber:self.updatedCountNumber font:font fontAttributes:view.fontAttributes color:color skipAnimation:YES];
+        else
+            [view setUpdatedCount:updatedCount updatedCountNumber:self.updatedCountNumber font:font color:color skipAnimation:YES];
     }
 }
 
