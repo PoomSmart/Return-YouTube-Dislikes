@@ -221,9 +221,13 @@ extern NSBundle *RYDBundle();
     if (mode == 0) {
         if (isShorts) {
             ELMContainerNode *node1 = [node.yogaChildren firstObject];
-            ELMContainerNode *node2 = [node1.yogaChildren firstObject];
-            if (node2.yogaChildren.count < 2) return;
-            dislikeTextNode = (ELMTextNode *)node2.yogaChildren[1];
+            if (node1.yogaChildren.count > 1)
+                dislikeTextNode = (ELMTextNode *)node1.yogaChildren[1];
+            else {
+                ELMContainerNode *node2 = [node1.yogaChildren firstObject];
+                if (node2.yogaChildren.count < 2) return;
+                dislikeTextNode = (ELMTextNode *)node2.yogaChildren[1];
+            }
             mutableDislikeText = [[NSMutableAttributedString alloc] initWithAttributedString:dislikeTextNode.attributedText];
         } else {
             _ASDisplayView *superview = (_ASDisplayView *)self.superview;
@@ -266,9 +270,13 @@ extern NSBundle *RYDBundle();
     } else {
         if (isShorts) {
             ELMContainerNode *node1 = [node.yogaChildren firstObject];
-            ELMContainerNode *node2 = [node1.yogaChildren firstObject];
-            if (node2.yogaChildren.count < 2) return;
-            likeTextNode = (ELMTextNode *)node2.yogaChildren[1];
+            if (node1.yogaChildren.count > 1)
+                likeTextNode = (ELMTextNode *)node1.yogaChildren[1];
+            else {
+                ELMContainerNode *node2 = [node1.yogaChildren firstObject];
+                if (node2.yogaChildren.count < 2) return;
+                likeTextNode = (ELMTextNode *)node2.yogaChildren[1];
+            }
         } else {
             targetNode = node.yogaChildren[1];
             if ([targetNode isKindOfClass:%c(YTRollingNumberNode)]) {
