@@ -39,24 +39,32 @@ static NSString *formattedShortNumber(int64_t number) {
     return resultString;
 }
 
-NSString *getNormalizedDislikes(NSNumber *dislikeNumber, NSString *error) {
-    if (!dislikeNumber) return FAILED;
+NSString *getNormalizedNumber(NSNumber *number, BOOL exact, NSString *error) {
+    if (!number) return FAILED;
     if (error) return error;
-    if (ExactDislikeNumber())
-        return formattedLongNumber(dislikeNumber, nil);
-    NSString *dislikeCount = [dislikeNumber stringValue];
-    NSUInteger digits = dislikeCount.length;
+    if (exact)
+        return formattedLongNumber(number, nil);
+    NSString *count = [number stringValue];
+    NSUInteger digits = count.length;
     if (digits <= 3) // 0 - 999
-        return dislikeCount;
+        return count;
     if (@available(iOS 13.0, *))
-        return formattedShortNumber([dislikeNumber unsignedIntegerValue]);
+        return formattedShortNumber([number unsignedIntegerValue]);
     if (digits == 4) // 1000 - 9999
-        return getXPointYFormat(dislikeCount, 'K');
+        return getXPointYFormat(count, 'K');
     if (digits <= 6) // 10_000 - 999_999
-        return [NSString stringWithFormat:@"%@K", [dislikeCount substringToIndex:digits - 3]];
+        return [NSString stringWithFormat:@"%@K", [count substringToIndex:digits - 3]];
     if (digits <= 9) // 1_000_000 - 999_999_999
-        return [NSString stringWithFormat:@"%@M", [dislikeCount substringToIndex:digits - 6]];
-    return [NSString stringWithFormat:@"%@B", [dislikeCount substringToIndex:digits - 9]]; // 1_000_000_000+
+        return [NSString stringWithFormat:@"%@M", [count substringToIndex:digits - 6]];
+    return [NSString stringWithFormat:@"%@B", [count substringToIndex:digits - 9]]; // 1_000_000_000+
+}
+
+NSString *getNormalizedLikes(NSNumber *likeNumber, NSString *error) {
+    return getNormalizedNumber(likeNumber, ExactLikeNumber(), error);
+}
+
+NSString *getNormalizedDislikes(NSNumber *dislikeNumber, NSString *error) {
+    return getNormalizedNumber(dislikeNumber, ExactDislikeNumber(), error);
 }
 
 void getVoteFromVideoWithHandler(NSCache <NSString *, NSDictionary *> *cache, NSString *videoId, int retryCount, void (^handler)(NSDictionary *d, NSString *error)) {

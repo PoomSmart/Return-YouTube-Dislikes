@@ -211,7 +211,7 @@ extern NSBundle *RYDBundle();
     UIViewController *vc = [node closestViewController];
     if (![vc isKindOfClass:%c(YTWatchNextResultsViewController)] && ![vc isKindOfClass:%c(YTShortsPlayerViewController)]) return;
     if (node.yogaChildren.count < 1) return;
-    BOOL pair = NO;
+    int pairMode = -1;
     id targetNode = nil;
     ELMTextNode *likeTextNode = nil;
     YTRollingNumberNode *likeRollingNumberNode = nil;
@@ -237,17 +237,11 @@ extern NSBundle *RYDBundle();
                 targetNode = likeNode.yogaChildren[1];
                 if ([targetNode isKindOfClass:%c(YTRollingNumberNode)]) {
                     likeRollingNumberNode = (YTRollingNumberNode *)targetNode;
-                    ASNodeContext *context = [(ASNodeContext *)[%c(ASNodeContext) alloc] initWithOptions:1];
-                    ASNodeContextPush(context);
-                    dislikeRollingNumberNode = [[%c(YTRollingNumberNode) alloc] initWithElement:likeRollingNumberNode.element context:[likeRollingNumberNode valueForKey:@"_context"]];
-                    ASNodeContextPop();
-                    dislikeRollingNumberNode.alterMode = 1;
-                    dislikeRollingNumberNode.updatedCount = FETCHING;
-                    dislikeRollingNumberNode.updatedCountNumber = @(0);
-                    [dislikeRollingNumberNode updateRollingNumberView];
+                    likeRollingNumberNode.alterMode = 3;
+                    [likeRollingNumberNode updateRollingNumberView];
+                    dislikeRollingNumberNode = likeRollingNumberNode;
                     [node addYogaChild:dislikeRollingNumberNode];
-                    [self addSubview:dislikeRollingNumberNode.view];
-                    pair = YES;
+                    pairMode = 1;
                 } else if ([targetNode isKindOfClass:%c(ELMTextNode)]) {
                     likeTextNode = (ELMTextNode *)targetNode;
                     ASNodeContext *context = [(ASNodeContext *)[%c(ASNodeContext) alloc] initWithOptions:1];
@@ -259,7 +253,7 @@ extern NSBundle *RYDBundle();
                     [node addYogaChild:dislikeTextNode];
                     dislikeTextNode.blockUpdate = YES;
                     [self addSubview:dislikeTextNode.view];
-                    pair = YES;
+                    pairMode = 0;
                 }
             } else {
                 dislikeTextNode = node.yogaChildren[1];
@@ -332,8 +326,22 @@ extern NSBundle *RYDBundle();
             if (mode == 0) {
                 NSNumber *dislikeNumber = data[@"dislikes"];
                 NSString *dislikeCount = getNormalizedDislikes(dislikeNumber, error);
-                NSString *dislikeString = pair ? [NSString stringWithFormat:@"  %@ ", dislikeCount] : dislikeCount;
+                NSString *dislikeString;
+                switch (pairMode) {
+                    case -1:
+                        dislikeString = dislikeCount;
+                        break;
+                    case 0:
+                        dislikeString = [NSString stringWithFormat:@"  %@ ", dislikeCount];
+                        break;
+                    case 1: {
+                        NSString *likeCount = getNormalizedLikes(data[@"likes"], nil);
+                        dislikeString = [NSString stringWithFormat:@"%@ | %@", dislikeCount, likeCount];
+                        break;
+                    }
+                }
                 if (dislikeRollingNumberNode) {
+                    dislikeRollingNumberNode.alterMode = 1;
                     dislikeRollingNumberNode.updatedCount = dislikeString;
                     dislikeRollingNumberNode.updatedCountNumber = dislikeNumber;
                     [dislikeRollingNumberNode updateRollingNumberView];
@@ -358,15 +366,20 @@ extern NSBundle *RYDBundle();
 
 - (void)updateRollingNumberView {
     %orig;
-    if ((self.alterMode == 1 || self.alterMode == 2) && (self.updatedCount && self.updatedCountNumber)) {
+    if (self.alterMode) {
         YTRollingNumberView *view = [self valueForKey:@"_rollingNumberView"];
-        UIFont *font = view.font;
-        UIColor *color = view.color;
-        NSString *updatedCount = [NSString stringWithFormat:@" %@", self.updatedCount];
-        if ([view respondsToSelector:@selector(setUpdatedCount:updatedCountNumber:font:fontAttributes:color:skipAnimation:)])
-            [view setUpdatedCount:updatedCount updatedCountNumber:self.updatedCountNumber font:font fontAttributes:view.fontAttributes color:color skipAnimation:YES];
-        else
-            [view setUpdatedCount:updatedCount updatedCountNumber:self.updatedCountNumber font:font color:color skipAnimation:YES];
+        if (self.alterMode == 3) {
+            self.updatedCount = [NSString stringWithFormat:@"%@ %@", view.updatedCount, FETCHING];
+            self.updatedCountNumber = view.updatedCountNumber;
+        } else if (self.updatedCount && self.updatedCountNumber) {
+            UIFont *font = view.font;
+            UIColor *color = view.color;
+            NSString *updatedCount = [NSString stringWithFormat:@" %@", self.updatedCount];
+            if ([view respondsToSelector:@selector(setUpdatedCount:updatedCountNumber:font:fontAttributes:color:skipAnimation:)])
+                [view setUpdatedCount:updatedCount updatedCountNumber:self.updatedCountNumber font:font fontAttributes:view.fontAttributes color:color skipAnimation:YES];
+            else
+                [view setUpdatedCount:updatedCount updatedCountNumber:self.updatedCountNumber font:font color:color skipAnimation:YES];
+        }
     }
 }
 
@@ -413,10 +426,11 @@ extern NSBundle *RYDBundle();
             [alertView show];
         });
     }
-    NSString *frameworkPath = [NSString stringWithFormat:@"%@/Frameworks/Module_Framework.framework/Module_Framework", NSBundle.mainBundle.bundlePath];
-    NSBundle *bundle = [NSBundle bundleWithPath:frameworkPath];
-    if (!bundle.loaded) [bundle load];
-    MSImageRef ref = MSGetImageByName([frameworkPath UTF8String]);
+    NSString *bundlePath = [NSString stringWithFormat:@"%@/Frameworks/Module_Framework.framework/Module_Framework", NSBundle.mainBundle.bundlePath];
+    NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
+    if (bundle) [bundle load];
+    else bundlePath = NSBundle.mainBundle.executablePath;
+    MSImageRef ref = MSGetImageByName([bundlePath UTF8String]);
     ASNodeContextPush = (void (*)(ASNodeContext *))MSFindSymbol(ref, "_ASNodeContextPush");
     ASNodeContextPop = (void (*)(void))MSFindSymbol(ref, "_ASNodeContextPop");
     %init;
