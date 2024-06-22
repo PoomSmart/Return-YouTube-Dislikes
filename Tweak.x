@@ -311,6 +311,7 @@ extern NSBundle *RYDBundle();
                 NSString *likeCount = formattedLongNumber(likeNumber, nil);
                 if (likeCount) {
                     if (likeRollingNumberNode) {
+                        if (likeRollingNumberNode.alterMode == 1) return;
                         likeRollingNumberNode.updatedCount = likeCount;
                         likeRollingNumberNode.updatedCountNumber = likeNumber;
                         [likeRollingNumberNode updateRollingNumberView];
@@ -336,7 +337,7 @@ extern NSBundle *RYDBundle();
                         break;
                     case 1: {
                         NSString *likeCount = getNormalizedLikes(data[@"likes"], nil);
-                        dislikeString = [NSString stringWithFormat:@"%@ | %@", dislikeCount, likeCount];
+                        dislikeString = [NSString stringWithFormat:@"👎 %@ | 👍 %@", dislikeCount, likeCount];
                         break;
                     }
                 }
@@ -369,7 +370,7 @@ extern NSBundle *RYDBundle();
     if (self.alterMode) {
         YTRollingNumberView *view = [self valueForKey:@"_rollingNumberView"];
         if (self.alterMode == 3) {
-            self.updatedCount = [NSString stringWithFormat:@"%@ %@", view.updatedCount, FETCHING];
+            self.updatedCount = [NSString stringWithFormat:@"👎 %@ | 👍 %@", FETCHING, view.updatedCount];
             self.updatedCountNumber = view.updatedCountNumber;
         } else if (self.updatedCount && self.updatedCountNumber) {
             UIFont *font = view.font;
