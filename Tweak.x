@@ -7,6 +7,8 @@
 
 static NSCache <NSString *, NSDictionary *> *cache;
 
+BOOL isBuggyVersion;
+
 void (*ASNodeContextPush)(ASNodeContext *);
 void (*ASNodeContextPop)(void);
 
@@ -235,12 +237,22 @@ extern NSBundle *RYDBundle();
             ELMContainerNode *likeNode = snode.yogaChildren[0];
             if ([likeNode.accessibilityIdentifier isEqualToString:@"id.video.like.button"] && likeNode.yogaChildren.count == 2) {
                 targetNode = likeNode.yogaChildren[1];
-                if ([targetNode isKindOfClass:%c(YTRollingNumberNode)]) {
-                    likeRollingNumberNode = (YTRollingNumberNode *)targetNode;
-                    likeRollingNumberNode.alterMode = 3;
-                    [likeRollingNumberNode updateRollingNumberView];
-                    dislikeRollingNumberNode = likeRollingNumberNode;
-                    [node addYogaChild:dislikeRollingNumberNode];
+                if (isBuggyVersion) {
+                    if ([targetNode isKindOfClass:%c(YTRollingNumberNode)]) {
+                        likeRollingNumberNode = (YTRollingNumberNode *)targetNode;
+                        likeRollingNumberNode.alterMode = 3;
+                        [likeRollingNumberNode updateRollingNumberView];
+                        dislikeRollingNumberNode = likeRollingNumberNode;
+                        [node addYogaChild:dislikeRollingNumberNode];
+                    } else {
+                        likeTextNode = (ELMTextNode *)targetNode;
+                        dislikeTextNode = likeTextNode;
+                        mutableDislikeText = [[NSMutableAttributedString alloc] initWithAttributedString:likeTextNode.attributedText];
+                        dislikeTextNode.attributedText = mutableDislikeText;
+                        [node addYogaChild:dislikeTextNode];
+                        dislikeTextNode.blockUpdate = YES;
+                        [self addSubview:dislikeTextNode.view];
+                    }
                     pairMode = 1;
                 } else if ([targetNode isKindOfClass:%c(ELMTextNode)]) {
                     likeTextNode = (ELMTextNode *)targetNode;
@@ -316,7 +328,7 @@ extern NSBundle *RYDBundle();
                         likeRollingNumberNode.updatedCountNumber = likeNumber;
                         [likeRollingNumberNode updateRollingNumberView];
                         [likeRollingNumberNode relayoutNode];
-                    } else {
+                    } else if (!isBuggyVersion) {
                         NSMutableAttributedString *mutableLikeText = [[NSMutableAttributedString alloc] initWithAttributedString:likeTextNode.attributedText];
                         mutableLikeText.mutableString.string = likeCount;
                         likeTextNode.attributedText = mutableLikeText;
@@ -364,6 +376,16 @@ extern NSBundle *RYDBundle();
 %property (assign) int alterMode;
 %property (strong, nonatomic) NSString *updatedCount;
 %property (strong, nonatomic) NSNumber *updatedCountNumber;
+
+- (id)initWithElement:(id)element context:(id)context {
+    self = %orig;
+    if (self) {
+        self.alterMode = 0;
+        self.updatedCount = nil;
+        self.updatedCountNumber = nil;
+    }
+    return self;
+}
 
 - (void)updateRollingNumberView {
     %orig;
@@ -430,7 +452,10 @@ extern NSBundle *RYDBundle();
     NSString *bundlePath = [NSString stringWithFormat:@"%@/Frameworks/Module_Framework.framework/Module_Framework", NSBundle.mainBundle.bundlePath];
     NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
     if (bundle) [bundle load];
-    else bundlePath = NSBundle.mainBundle.executablePath;
+    else {
+        bundlePath = NSBundle.mainBundle.executablePath;
+        isBuggyVersion = YES;
+    }
     MSImageRef ref = MSGetImageByName([bundlePath UTF8String]);
     ASNodeContextPush = (void (*)(ASNodeContext *))MSFindSymbol(ref, "_ASNodeContextPush");
     ASNodeContextPop = (void (*)(void))MSFindSymbol(ref, "_ASNodeContextPop");
