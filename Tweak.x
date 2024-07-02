@@ -4,10 +4,11 @@
 #import "Tweak.h"
 #import "API.h"
 #import "Vote.h"
+#import <HBLog.h>
 
 static NSCache <NSString *, NSDictionary *> *cache;
 
-BOOL isBuggyVersion;
+BOOL isBuggyVersion = NO;
 
 void (*ASNodeContextPush)(ASNodeContext *);
 void (*ASNodeContextPop)(void);
@@ -237,23 +238,27 @@ extern NSBundle *RYDBundle();
             ELMContainerNode *likeNode = snode.yogaChildren[0];
             if ([likeNode.accessibilityIdentifier isEqualToString:@"id.video.like.button"] && likeNode.yogaChildren.count == 2) {
                 targetNode = likeNode.yogaChildren[1];
-                if (isBuggyVersion) {
-                    if ([targetNode isKindOfClass:%c(YTRollingNumberNode)]) {
-                        likeRollingNumberNode = (YTRollingNumberNode *)targetNode;
+                if ([targetNode isKindOfClass:%c(YTRollingNumberNode)]) {
+                    likeRollingNumberNode = (YTRollingNumberNode *)targetNode;
+                    if (isBuggyVersion) {
                         likeRollingNumberNode.alterMode = 3;
                         [likeRollingNumberNode updateRollingNumberView];
                         dislikeRollingNumberNode = likeRollingNumberNode;
                         [node addYogaChild:dislikeRollingNumberNode];
+                        pairMode = 1;
                     } else {
-                        likeTextNode = (ELMTextNode *)targetNode;
-                        dislikeTextNode = likeTextNode;
-                        mutableDislikeText = [[NSMutableAttributedString alloc] initWithAttributedString:likeTextNode.attributedText];
-                        dislikeTextNode.attributedText = mutableDislikeText;
-                        [node addYogaChild:dislikeTextNode];
-                        dislikeTextNode.blockUpdate = YES;
-                        [self addSubview:dislikeTextNode.view];
+                        ASNodeContext *context = [(ASNodeContext *)[%c(ASNodeContext) alloc] initWithOptions:1];
+                        ASNodeContextPush(context);
+                        dislikeRollingNumberNode = [[%c(YTRollingNumberNode) alloc] initWithElement:likeRollingNumberNode.element context:[likeRollingNumberNode valueForKey:@"_context"]];
+                        ASNodeContextPop();
+                        dislikeRollingNumberNode.alterMode = 1;
+                        dislikeRollingNumberNode.updatedCount = FETCHING;
+                        dislikeRollingNumberNode.updatedCountNumber = @(0);
+                        [dislikeRollingNumberNode updateRollingNumberView];
+                        [node addYogaChild:dislikeRollingNumberNode];
+                        [self addSubview:dislikeRollingNumberNode.view];
+                        pairMode = 0;
                     }
-                    pairMode = 1;
                 } else if ([targetNode isKindOfClass:%c(ELMTextNode)]) {
                     likeTextNode = (ELMTextNode *)targetNode;
                     ASNodeContext *context = [(ASNodeContext *)[%c(ASNodeContext) alloc] initWithOptions:1];
@@ -449,7 +454,7 @@ extern NSBundle *RYDBundle();
             [alertView show];
         });
     }
-    NSString *bundlePath = [NSString stringWithFormat:@"%@/Frameworks/Module_Framework.framework/Module_Framework", NSBundle.mainBundle.bundlePath];
+    NSString *bundlePath = [NSString stringWithFormat:@"%@/Frameworks/Module_Framework.framework", NSBundle.mainBundle.bundlePath];
     NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
     if (bundle) [bundle load];
     else {
