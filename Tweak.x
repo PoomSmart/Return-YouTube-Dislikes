@@ -1,10 +1,10 @@
+#import <HBLog.h>
 #import <UIKit/UIKit.h>
 #import "Settings.h"
 #import "TweakSettings.h"
 #import "Tweak.h"
 #import "API.h"
 #import "Vote.h"
-#import <HBLog.h>
 
 static NSCache <NSString *, NSDictionary *> *cache;
 
@@ -198,11 +198,13 @@ extern NSBundle *RYDBundle();
 
 %end
 
+NSString *currentVideoIdForLike = nil;
+NSString *currentVideoIdForDislike = nil;
+
 %hook _ASDisplayView
 
-- (void)didMoveToSuperview {
+- (void)didMoveToWindow {
     %orig;
-    if (!TweakEnabled()) return;
     int mode = -1;
     ELMContainerNode *node = (ELMContainerNode *)self.keepalive_node;
     if ([node.accessibilityIdentifier isEqualToString:@"id.video.dislike.button"] || [node.accessibilityIdentifier isEqualToString:@"id.reel_dislike_button"])
@@ -210,17 +212,40 @@ extern NSBundle *RYDBundle();
     if ([node.accessibilityIdentifier isEqualToString:@"id.video.like.button"] || [node.accessibilityIdentifier isEqualToString:@"id.reel_like_button"])
         mode = 1;
     if (mode == -1) return;
+    if (!TweakEnabled()) return;
     BOOL isShorts = [node.accessibilityIdentifier hasPrefix:@"id.reel"];
     UIViewController *vc = [node closestViewController];
     if (![vc isKindOfClass:%c(YTWatchNextResultsViewController)] && ![vc isKindOfClass:%c(YTShortsPlayerViewController)]) return;
     if (node.yogaChildren.count < 1) return;
+    YTPlayerViewController *pvc;
+    if ([vc isKindOfClass:%c(YTShortsPlayerViewController)])
+        pvc = ((YTShortsPlayerViewController *)vc).player;
+    else {
+        NSObject *wc;
+        @try {
+            wc = [vc valueForKey:@"_metadataPanelStateProvider"];
+        } @catch (id ex) {
+            wc = [vc valueForKey:@"_ngwMetadataPanelStateProvider"];
+        }
+        @try {
+            YTWatchPlaybackController *wpc = ((YTWatchController *)wc).watchPlaybackController;
+            pvc = [wpc valueForKey:@"_playerViewController"];
+        } @catch (id ex) {
+            pvc = [wc valueForKey:@"_playerViewController"];
+        }
+    }
+    NSString *videoId = [pvc currentVideoID];
+    if (!videoId) return;
+    if ([videoId isEqualToString:currentVideoIdForLike] && [videoId isEqualToString:currentVideoIdForDislike]) return;
+    if (mode == 0) currentVideoIdForDislike = videoId;
+    else currentVideoIdForLike = videoId;
     int pairMode = -1;
     id targetNode = nil;
-    ELMTextNode *likeTextNode = nil;
-    YTRollingNumberNode *likeRollingNumberNode = nil;
-    ELMTextNode *dislikeTextNode = nil;
-    YTRollingNumberNode *dislikeRollingNumberNode = nil;
-    NSMutableAttributedString *mutableDislikeText = nil;
+    __block ELMTextNode *likeTextNode = nil;
+    __block YTRollingNumberNode *likeRollingNumberNode = nil;
+    __block ELMTextNode *dislikeTextNode = nil;
+    __block YTRollingNumberNode *dislikeRollingNumberNode = nil;
+    __block NSMutableAttributedString *mutableDislikeText = nil;
     if (mode == 0) {
         if (isShorts) {
             ELMContainerNode *node1 = [node.yogaChildren firstObject];
@@ -309,30 +334,13 @@ extern NSBundle *RYDBundle();
             else return;
         }
     }
-    YTPlayerViewController *pvc;
-    if ([vc isKindOfClass:%c(YTShortsPlayerViewController)])
-        pvc = ((YTShortsPlayerViewController *)vc).player;
-    else {
-        NSObject *wc;
-        @try {
-            wc = [vc valueForKey:@"_metadataPanelStateProvider"];
-        } @catch (id ex) {
-            wc = [vc valueForKey:@"_ngwMetadataPanelStateProvider"];
-        }
-        @try {
-            YTWatchPlaybackController *wpc = ((YTWatchController *)wc).watchPlaybackController;
-            pvc = [wpc valueForKey:@"_playerViewController"];
-        } @catch (id ex) {
-            pvc = [wc valueForKey:@"_playerViewController"];
-        }
-    }
-    NSString *videoId = [pvc currentVideoID];
     if (mode == 0 && dislikeTextNode) {
         mutableDislikeText.mutableString.string = FETCHING;
         dislikeTextNode.attributedText = mutableDislikeText;
     }
     getVoteFromVideoWithHandler(cache, videoId, maxRetryCount, ^(NSDictionary *data, NSString *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
+            // HBLogDebug(@"RYD: Vote data for video %@: %@", videoId, dislikeTextNode);
             if (ExactLikeNumber() && error == nil) {
                 NSNumber *likeNumber = data[@"likes"];
                 NSString *likeCount = formattedLongNumber(likeNumber, nil);
