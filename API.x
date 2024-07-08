@@ -11,7 +11,18 @@ static BOOL isRegistered() {
     return [[NSUserDefaults standardUserDefaults] boolForKey:RegistrationConfirmedKey];
 }
 
-static const char *charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+static int toRYDLikeStatus(YTLikeStatus likeStatus) {
+    switch (likeStatus) {
+        case YTLikeStatusLike:
+            return 1;
+        case YTLikeStatusDislike:
+            return -1;
+        default:
+            return 0;
+    }
+}
+
+static const char *charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
 // Ported to objc from RYD browser extension
 static NSString *generateUserID() {
@@ -20,7 +31,7 @@ static NSString *generateUserID() {
     HBLogDebug(@"generateUserID()");
     char userID[36 + 1];
     for (int i = 0; i < 36; ++i)
-        userID[i] = charset[arc4random_uniform(64)];
+        userID[i] = charset[arc4random_uniform(62)];
     userID[36] = '\0';
     NSString *result = [NSString stringWithUTF8String:userID];
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -91,6 +102,7 @@ void fetch(
     void (^networkErrorHandler)(void),
     void (^dataErrorHandler)(void)
 ) {
+    HBLogDebug(@"fetch() (%@, %@)", endpoint, method);
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@", @(API_URL), endpoint]];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
     NSMutableURLRequest *urlRequest = [NSMutableURLRequest requestWithURL:url];
@@ -205,7 +217,7 @@ static void registerUser() {
                         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:RegistrationConfirmedKey];
                         [[NSUserDefaults standardUserDefaults] synchronize];
                     }
-                    HBLogDebug(@"registerUser() success or already registered");
+                    HBLogDebug(@"registerUser() success or already registered: %@", data);
                 },
                 NULL,
                 ^() {
@@ -226,19 +238,9 @@ static void registerUser() {
     );
 }
 
-static int toRYDLikeStatus(YTLikeStatus likeStatus) {
-    switch (likeStatus) {
-        case YTLikeStatusLike:
-            return 1;
-        case YTLikeStatusDislike:
-            return -1;
-        default:
-            return 0;
-    }
-}
-
 // Ported to objc from RYD browser extension
-void sendVote(NSString *videoId, YTLikeStatus s) {
+void _sendVote(NSString *videoId, YTLikeStatus s, int retryCount) {
+    if (retryCount <= 0) return;
     NSString *userId = getUserID();
     if (!userId || !isRegistered()) {
         registerUser();
@@ -286,7 +288,7 @@ void sendVote(NSString *videoId, YTLikeStatus s) {
                 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                     registerUser();
                     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                        sendVote(videoId, s);
+                        _sendVote(videoId, s, retryCount - 1);
                     });
                 });
                 return NO;
@@ -300,4 +302,18 @@ void sendVote(NSString *videoId, YTLikeStatus s) {
             HBLogDebug(@"sendVote() failed (data)");
         }
     );
+}
+
+void sendVote(NSString *videoId, YTLikeStatus s) {
+    _sendVote(videoId, s, 3);
+}
+
+%ctor {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    if (![defaults boolForKey:DidResetUserIDKey]) {
+        [defaults setBool:YES forKey:DidResetUserIDKey];
+        [defaults removeObjectForKey:UserIDKey];
+        [defaults removeObjectForKey:RegistrationConfirmedKey];
+        [defaults synchronize];
+    }
 }

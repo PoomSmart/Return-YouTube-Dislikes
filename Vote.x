@@ -42,7 +42,7 @@ static NSString *formattedShortNumber(int64_t number) {
 
 NSString *getNormalizedNumber(NSNumber *number, BOOL exact, NSString *error) {
     if (!number) {
-        // HBLogError(@"RYD: Number is nil, error: %@", error ?: @"N/A");
+        HBLogError(@"RYD: Number is nil, error: %@", error);
         return FAILED;
     }
     if (exact)
@@ -74,17 +74,17 @@ void getVoteFromVideoWithHandler(NSCache <NSString *, NSDictionary *> *cache, NS
     if (retryCount <= 0) return;
     NSDictionary *data = [cache objectForKey:videoId];
     if (data) {
-        // HBLogDebug(@"RYD: Cache hit for video %@", videoId);
+        HBLogDebug(@"RYD: Cache hit for video %@", videoId);
         handler(data, nil);
         return;
     }
-    // HBLogDebug(@"RYD: Cache miss for video %@", videoId);
+    HBLogDebug(@"RYD: Cache miss for video %@", videoId);
     fetch(
         [NSString stringWithFormat:@"/votes?videoId=%@", videoId],
         @"GET",
         nil,
         ^(NSDictionary *data) {
-            // HBLogDebug(@"RYD: Cache store for video %@ (%@)", videoId, data);
+            HBLogDebug(@"RYD: Cache store for video %@ (%@)", videoId, data);
             [cache setObject:data forKey:videoId];
             handler(data, nil);
         },

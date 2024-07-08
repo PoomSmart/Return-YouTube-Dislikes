@@ -340,7 +340,7 @@ NSString *currentVideoIdForDislike = nil;
     }
     getVoteFromVideoWithHandler(cache, videoId, maxRetryCount, ^(NSDictionary *data, NSString *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            // HBLogDebug(@"RYD: Vote data for video %@: %@", videoId, dislikeTextNode);
+            HBLogDebug(@"RYD: Vote data for video %@: %@", videoId, data);
             if (ExactLikeNumber() && error == nil) {
                 NSNumber *likeNumber = data[@"likes"];
                 NSString *likeCount = formattedLongNumber(likeNumber, nil);
