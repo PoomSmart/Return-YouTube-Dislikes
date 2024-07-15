@@ -474,8 +474,10 @@ NSString *currentVideoIdForDislike = nil;
     }
     NSString *bundlePath = [NSString stringWithFormat:@"%@/Frameworks/Module_Framework.framework", NSBundle.mainBundle.bundlePath];
     NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
-    if (bundle) [bundle load];
-    else {
+    if (bundle) {
+        [bundle load];
+        bundlePath = [NSString stringWithFormat:@"%@/Module_Framework", bundlePath];
+    } else {
         bundlePath = NSBundle.mainBundle.executablePath;
         isBuggyVersion = YES;
     }
