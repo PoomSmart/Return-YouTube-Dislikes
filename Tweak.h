@@ -27,7 +27,6 @@
 @end
 
 @interface YTRollingNumberNode (RYD)
-@property (assign) int alterMode;
 @property (strong, nonatomic) NSString *updatedCount;
 @property (strong, nonatomic) NSNumber *updatedCountNumber;
 @end
