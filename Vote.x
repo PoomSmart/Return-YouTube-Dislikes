@@ -89,6 +89,7 @@ void getVoteFromVideoWithHandler(NSCache <NSString *, NSDictionary *> *cache, NS
             handler(data, nil);
         },
         ^BOOL(NSUInteger responseCode) {
+            HBLogDebug(@"RYD: Response code %lu for video %@", responseCode, videoId);
             if (responseCode == 502 || responseCode == 503) {
                 handler(nil, @"CON"); // connection error
                 return NO;
@@ -112,6 +113,7 @@ void getVoteFromVideoWithHandler(NSCache <NSString *, NSDictionary *> *cache, NS
             return YES;
         },
         ^() {
+            HBLogDebug(@"RYD: Retry for video %@", videoId);
             handler(nil, FAILED);
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 getVoteFromVideoWithHandler(cache, videoId, retryCount - 1, handler);

@@ -1,11 +1,15 @@
+#import <YouTubeHeader/_ASCollectionViewCell.h>
 #import <YouTubeHeader/_ASDisplayView.h>
+#import <YouTubeHeader/ASCollectionView.h>
 #import <YouTubeHeader/ASNodeContext.h>
+#import <YouTubeHeader/ELMCellNode.h>
 #import <YouTubeHeader/ELMContainerNode.h>
 #import <YouTubeHeader/ELMNodeController.h>
 #import <YouTubeHeader/ELMNodeFactory.h>
 #import <YouTubeHeader/ELMTextNode.h>
 #import <YouTubeHeader/UIView+AsyncDisplayKit.h>
 #import <YouTubeHeader/YTAlertView.h>
+#import <YouTubeHeader/YTELMView.h>
 #import <YouTubeHeader/YTFullscreenEngagementActionBarButtonRenderer.h>
 #import <YouTubeHeader/YTFullscreenEngagementActionBarButtonView.h>
 #import <YouTubeHeader/YTIButtonSupportedRenderers.h>
@@ -15,18 +19,26 @@
 #import <YouTubeHeader/YTIToggleButtonRenderer.h>
 #import <YouTubeHeader/YTPlayerViewController.h>
 #import <YouTubeHeader/YTQTMButton.h>
+#import <YouTubeHeader/YTReelElementAsyncComponentView.h>
+#import <YouTubeHeader/YTReelModel.h>
 #import <YouTubeHeader/YTReelWatchLikesController.h>
+#import <YouTubeHeader/YTReelWatchPlaybackOverlayView.h>
 #import <YouTubeHeader/YTRollingNumberNode.h>
 #import <YouTubeHeader/YTRollingNumberView.h>
 #import <YouTubeHeader/YTShortsPlayerViewController.h>
 #import <YouTubeHeader/YTSlimVideoDetailsActionView.h>
 #import <YouTubeHeader/YTWatchController.h>
 
-@interface ELMTextNode (RYD)
-@property (assign) BOOL blockUpdate;
+@interface ASCollectionView (RYD)
+@property (assign, nonatomic) BOOL didGetVote;
 @end
 
 @interface YTRollingNumberNode (RYD)
 @property (strong, nonatomic) NSString *updatedCount;
 @property (strong, nonatomic) NSNumber *updatedCountNumber;
+- (void)updateCount:(NSString *)updateCount color:(UIColor *)color;
+@end
+
+@interface YTReelWatchPlaybackOverlayView (RYD)
+@property (assign, nonatomic) BOOL didGetVote;
 @end
