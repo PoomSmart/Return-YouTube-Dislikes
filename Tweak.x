@@ -372,20 +372,23 @@ static void getVoteAndModifyButtons(
 
 %property (assign, nonatomic) BOOL didGetVote;
 
-- (void)layoutActionBarExperimental {
+- (void)layoutActionBar {
     %orig;
     if (!TweakEnabled()) return;
     if (self.didGetVote) return;
-    YTELMView *elmView = [self valueForKey:@"_actionBarView"];
-    if (elmView == nil) {
-        YTReelElementAsyncComponentView *view = [self valueForKey:@"_actionBarComponentView"];
-        elmView = [view valueForKey:@"_elementView"];
-    }
-    ELMContainerNode *containerNode = [elmView valueForKey:@"_rootNode"];
     YTShortsPlayerViewController *spvc = [self parentResponder];
     NSString *videoId = [spvc videoId];
     HBLogDebug(@"RYD: Short ID: %@", videoId);
     if (videoId == nil) return;
+    YTELMView *elmView = [self valueForKey:@"_actionBarView"];
+    if (elmView == nil) {
+        @try {
+            YTReelElementAsyncComponentView *view = [self valueForKey:@"_actionBarComponentView"];
+            elmView = [view valueForKey:@"_elementView"];
+        } @catch (id ex) {}
+    }
+    if (elmView == nil) return;
+    ELMContainerNode *containerNode = [elmView valueForKey:@"_rootNode"];
     ELMContainerNode *likeNode = [containerNode.yogaChildren firstObject];
     ELMContainerNode *dislikeNode = containerNode.yogaChildren[1];
     do {
