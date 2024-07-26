@@ -29,10 +29,6 @@
 #import <YouTubeHeader/YTSlimVideoDetailsActionView.h>
 #import <YouTubeHeader/YTWatchController.h>
 
-@interface ASCollectionView (RYD)
-@property (assign, nonatomic) BOOL didGetVote;
-@end
-
 @interface YTRollingNumberNode (RYD)
 @property (strong, nonatomic) NSString *updatedCount;
 @property (strong, nonatomic) NSNumber *updatedCountNumber;

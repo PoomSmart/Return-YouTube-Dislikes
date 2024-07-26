@@ -312,8 +312,11 @@ void sendVote(NSString *videoId, YTLikeStatus s) {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     if (![defaults boolForKey:DidResetUserIDKey]) {
         [defaults setBool:YES forKey:DidResetUserIDKey];
-        [defaults removeObjectForKey:UserIDKey];
-        [defaults removeObjectForKey:RegistrationConfirmedKey];
+        NSString *userID = [defaults stringForKey:UserIDKey];
+        if ([userID containsString:@"+"] || [userID containsString:@"/"]) {
+            [defaults removeObjectForKey:UserIDKey];
+            [defaults removeObjectForKey:RegistrationConfirmedKey];
+        }
         [defaults synchronize];
     }
 }
