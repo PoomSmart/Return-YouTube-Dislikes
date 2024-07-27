@@ -258,6 +258,7 @@ static void getVoteAndModifyButtons(
             containerNode = [containerNode.yogaChildren firstObject];
         } while (containerNode.yogaChildren.count == 1);
         ELMContainerNode *likeNode = [containerNode.yogaChildren firstObject];
+        if (![likeNode.accessibilityIdentifier isEqualToString:@"id.video.like.button"]) return node;
         if (likeNode.yogaChildren.count == 2) {
             ELMContainerNode *dislikeNode = [containerNode.yogaChildren lastObject];
             isDislikeButtonModified = dislikeNode.yogaChildren.count == 2;
