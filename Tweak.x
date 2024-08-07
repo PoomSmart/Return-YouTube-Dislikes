@@ -256,9 +256,14 @@ static void getVoteAndModifyButtons(
         BOOL isDislikeButtonModified = NO;
         do {
             containerNode = [containerNode.yogaChildren firstObject];
+            if (containerNode.yogaChildren.count == 2)
+                containerNode = containerNode.yogaChildren[1];
         } while (containerNode.yogaChildren.count == 1);
         ELMContainerNode *likeNode = [containerNode.yogaChildren firstObject];
-        if (![likeNode.accessibilityIdentifier isEqualToString:@"id.video.like.button"]) return node;
+        if (![likeNode.accessibilityIdentifier isEqualToString:@"id.video.like.button"]) {
+            HBLogDebug(@"RYD: Like button not found, instead found %@", likeNode.accessibilityIdentifier);
+            return node;
+        }
         if (likeNode.yogaChildren.count == 2) {
             ELMContainerNode *dislikeNode = [containerNode.yogaChildren lastObject];
             isDislikeButtonModified = dislikeNode.yogaChildren.count == 2;
