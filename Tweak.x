@@ -396,7 +396,10 @@ static void getVoteAndModifyButtons(
     NSString *videoId = [spvc videoId];
     HBLogDebug(@"RYD: Short ID: %@", videoId);
     if (videoId == nil) return;
-    YTELMView *elmView = [self valueForKey:@"_actionBarView"];
+    YTELMView *elmView = nil;
+    @try {
+        elmView = [self valueForKey:@"_actionBarView"];
+    } @catch (id ex) {}
     if (elmView == nil) {
         @try {
             YTReelElementAsyncComponentView *view = [self valueForKey:@"_actionBarComponentView"];
