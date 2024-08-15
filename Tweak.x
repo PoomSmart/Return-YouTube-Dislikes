@@ -213,7 +213,7 @@ static NSString *getVideoId(ASDisplayNode *containerNode) {
     } @catch (id ex) {
         pvc = [wc valueForKey:@"_playerViewController"];
     }
-    return [pvc currentVideoID];
+    return [pvc contentVideoID];
 }
 
 static void getVoteAndModifyButtons(
