@@ -425,7 +425,7 @@ static void getVoteAndModifyButtons(
     ELMTextNode *shortLikeTextNode = likeNode.yogaChildren[1];
     ELMTextNode *shortDislikeTextNode = dislikeNode.yogaChildren[1];
     if (![shortLikeTextNode isKindOfClass:%c(ELMTextNode)] || ![shortDislikeTextNode isKindOfClass:%c(ELMTextNode)]) {
-        HBLogDebug(@"RYD: Short like or dislike text node not found");
+        HBLogDebug(@"%@", @"RYD: Short like or dislike text node not found");
         return;
     }
     __block NSMutableAttributedString *shortMutableDislikeText = [[NSMutableAttributedString alloc] initWithAttributedString:shortLikeTextNode.attributedText];

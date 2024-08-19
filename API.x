@@ -28,7 +28,7 @@ static const char *charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx
 static NSString *generateUserID() {
     NSString *existingID = getUserID();
     if (existingID) return existingID;
-    HBLogDebug(@"generateUserID()");
+    HBLogDebug(@"%@", @"generateUserID()");
     char userID[36 + 1];
     for (int i = 0; i < 36; ++i)
         userID[i] = charset[arc4random_uniform(62)];
@@ -185,7 +185,7 @@ static NSString *solvePuzzle(NSDictionary *data) {
     }
     free(buffer);
     if (!solution)
-        HBLogDebug(@"solvePuzzle() failed");
+        HBLogDebug(@"%@", @"solvePuzzle() failed");
     return solution;
 }
 
@@ -201,7 +201,7 @@ static void registerUser() {
         ^(NSDictionary *data) {
             NSString *solution = solvePuzzle(data);
             if (!solution) {
-                HBLogDebug(@"registerUser() skipped");
+                HBLogDebug(@"%@", @"registerUser() skipped");
                 return;
             }
             fetch(
@@ -210,7 +210,7 @@ static void registerUser() {
                 @{ @"solution": solution },
                 ^(NSDictionary *data) {
                     if ([data isKindOfClass:[NSNumber class]] && ![(NSNumber *)data boolValue]) {
-                        HBLogInfo(@"registerUser() failed");
+                        HBLogInfo(@"%@", @"registerUser() failed");
                         return;
                     }
                     if (!isRegistered()) {
@@ -221,19 +221,19 @@ static void registerUser() {
                 },
                 NULL,
                 ^() {
-                    HBLogDebug(@"registerUser() puzzle failed (network)");
+                    HBLogDebug(@"%@", @"registerUser() puzzle failed (network)");
                 },
                 ^() {
-                    HBLogDebug(@"registerUser() puzzle failed (data)");
+                    HBLogDebug(@"%@", @"registerUser() puzzle failed (data)");
                 }
             );
         },
         NULL,
         ^() {
-            HBLogDebug(@"registerUser() failed (network)");
+            HBLogDebug(@"%@", @"registerUser() failed (network)");
         },
         ^() {
-            HBLogDebug(@"registerUser() failed (data)");
+            HBLogDebug(@"%@", @"registerUser() failed (data)");
         }
     );
 }
@@ -259,7 +259,7 @@ void _sendVote(NSString *videoId, YTLikeStatus s, int retryCount) {
         ^(NSDictionary *data) {
             NSString *solution = solvePuzzle(data);
             if (!solution) {
-                HBLogDebug(@"sendVote() skipped");
+                HBLogDebug(@"%@", @"sendVote() skipped");
                 return;
             }
             fetch(
@@ -271,20 +271,20 @@ void _sendVote(NSString *videoId, YTLikeStatus s, int retryCount) {
                     @"solution": solution
                 },
                 ^(NSDictionary *data) {
-                    HBLogDebug(@"sendVote() success");
+                    HBLogDebug(@"%@", @"sendVote() success");
                 },
                 NULL,
                 ^() {
-                    HBLogDebug(@"sendVote() confirm failed (network)");
+                    HBLogDebug(@"%@", @"sendVote() confirm failed (network)");
                 },
                 ^() {
-                    HBLogDebug(@"sendVote() confirm failed (data)");
+                    HBLogDebug(@"%@", @"sendVote() confirm failed (data)");
                 }
             );
         },
         ^BOOL(NSUInteger responseCode) {
             if (responseCode == 401) {
-                HBLogDebug(@"sendVote() error 401, trying again");
+                HBLogDebug(@"%@", @"sendVote() error 401, trying again");
                 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                     registerUser();
                     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -296,10 +296,10 @@ void _sendVote(NSString *videoId, YTLikeStatus s, int retryCount) {
             return YES;
         },
         ^() {
-            HBLogDebug(@"sendVote() failed (network)");
+            HBLogDebug(@"%@", @"sendVote() failed (network)");
         },
         ^() {
-            HBLogDebug(@"sendVote() failed (data)");
+            HBLogDebug(@"%@", @"sendVote() failed (data)");
         }
     );
 }
