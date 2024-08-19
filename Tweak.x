@@ -392,8 +392,14 @@ static void getVoteAndModifyButtons(
     %orig;
     if (!TweakEnabled()) return;
     if (self.didGetVote) return;
-    YTShortsPlayerViewController *spvc = [self parentResponder];
-    NSString *videoId = [spvc videoId];
+    id spvc = [self parentResponder];
+    NSString *videoId = nil;
+    if ([spvc isKindOfClass:%c(YTShortsPlayerViewController)])
+        videoId = [(YTShortsPlayerViewController *)spvc videoId];
+    else if ([spvc isKindOfClass:%c(YTReelPlayerViewController)]) {
+        YTReelModel *model = [spvc valueForKey:@"_model"];
+        videoId = model.onesieVideoID;
+    }
     HBLogDebug(@"RYD: Short ID: %@", videoId);
     if (videoId == nil) return;
     YTELMView *elmView = nil;
