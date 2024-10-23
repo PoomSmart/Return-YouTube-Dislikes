@@ -1,0 +1,10 @@
+// Settings
+"ENABLED" = "Diaktifkan";
+"ENABLE_VOTE_SUBMIT" = "Aktifkan pengiriman voting";
+"ENABLE_VOTE_SUBMIT_DESC" = "Mengizinkan ID anonim unik Anda dan data suka / tidak suka video / shorts untuk dikirim ke %@.";
+"EXACT_LIKE_NUMBER" = "Jumlah suka yang tepat";
+"EXACT_DISLIKE_NUMBER" = "Jumlah tidak suka yang tepat";
+"EXACT_DISLIKE_NUMBER_DESC" = "Menampilkan jumlah tidak suka yang tepat. Misalnya: %@ -> %@.";
+
+// On app launch
+"WANT_TO_ENABLE" = "Apakah Anda ingin mengaktifkan pengiriman data suka / tidak suka Anda ke %@ sekarang? Anda dapat menonaktifkannya nanti dari pengaturan > %@ > %@.";
