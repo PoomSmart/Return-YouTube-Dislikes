@@ -85,9 +85,11 @@ NSBundle *RYDBundle() {
         }
         settingItemId:0];
     [sectionItems addObject:exactLike];
-    if ([delegate respondsToSelector:@selector(setSectionItems:forCategory:title:icon:titleDescription:headerHidden:)])
-        [delegate setSectionItems:sectionItems forCategory:RYDSection title:@(TWEAK_NAME) icon:nil titleDescription:nil headerHidden:NO];
-    else
+    if ([delegate respondsToSelector:@selector(setSectionItems:forCategory:title:icon:titleDescription:headerHidden:)]) {
+        YTIIcon *icon = [%c(YTIIcon) new];
+        icon.iconType = YT_DISLIKE;
+        [delegate setSectionItems:sectionItems forCategory:RYDSection title:@(TWEAK_NAME) icon:icon titleDescription:nil headerHidden:NO];
+    } else
         [delegate setSectionItems:sectionItems forCategory:RYDSection title:@(TWEAK_NAME) titleDescription:nil headerHidden:NO];
 }
 
