@@ -477,7 +477,7 @@ static void getVoteAndModifyButtons(
         [self updateCount:self.updatedCount color:nil];
 }
 
-%new(v@:@)
+%new(v@:@@)
 - (void)updateCount:(NSString *)updatedCount_ color:(UIColor *)color_ {
     YTRollingNumberView *view = [self valueForKey:@"_rollingNumberView"];
     UIFont *font = view.font;
