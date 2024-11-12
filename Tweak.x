@@ -398,7 +398,10 @@ static void getVoteAndModifyButtons(
         videoId = [(YTShortsPlayerViewController *)spvc videoId];
     else if ([spvc isKindOfClass:%c(YTReelPlayerViewController)]) {
         YTReelModel *model = [spvc valueForKey:@"_model"];
-        videoId = model.onesieVideoID;
+        if ([model respondsToSelector:@selector(onesieVideoID)])
+            videoId = model.onesieVideoID;
+        else
+            videoId = model.endpoint.reelWatchEndpoint.videoId;
     }
     HBLogDebug(@"RYD: Short ID: %@", videoId);
     if (videoId == nil) return;
