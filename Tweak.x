@@ -408,13 +408,11 @@ static void getVoteAndModifyButtons(
     YTELMView *elmView = nil;
     @try {
         elmView = [self valueForKey:@"_actionBarView"];
-    } @catch (id ex) {}
-    if (elmView == nil) {
-        @try {
+        if (elmView == nil) {
             YTReelElementAsyncComponentView *view = [self valueForKey:@"_actionBarComponentView"];
             elmView = [view valueForKey:@"_elementView"];
-        } @catch (id ex) {}
-    }
+        }
+    } @catch (id ex) {}
     if (elmView == nil) return;
     ELMContainerNode *containerNode = [elmView valueForKey:@"_rootNode"];
     ELMContainerNode *likeNode = [containerNode.yogaChildren firstObject];
