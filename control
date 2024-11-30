@@ -6,7 +6,7 @@ Description: Bring Back Dislikes On iOS YouTube
 Maintainer: PoomSmart and kirb <ytdislikesreturn@gmail.com>
 Author: PoomSmart and kirb <ytdislikesreturn@gmail.com>
 Section: Tweaks
-Depends: mobilesubstrate (>= 0.9.5000), firmware (>= 11.0), com.ps.yougroupsettings
+Depends: mobilesubstrate (>= 0.9.5000), firmware (>= 11.0)
 Tag: compatible_min::ios11.0
 Icon: https://img.chariz.cloud/icon/return-youtube-dislike/icon@3x.png
 Header: https://img.chariz.cloud/sileo-banner/return-youtube-dislike.jpg

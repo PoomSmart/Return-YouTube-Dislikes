@@ -187,7 +187,7 @@ extern NSBundle *RYDBundle();
 
 int overrideNodeCreation = 0;
 
-static BOOL isVideoScrollabelActionBar(ASCollectionView *collectionView) {
+static BOOL isVideoScrollableActionBar(ASCollectionView *collectionView) {
     return [collectionView.accessibilityIdentifier isEqualToString:@"id.video.scrollable_action_bar"];
 }
 
@@ -247,7 +247,7 @@ static void getVoteAndModifyButtons(
 
 - (ELMCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath {
     ELMCellNode *node = %orig;
-    if (isVideoScrollabelActionBar(self) && TweakEnabled()) {
+    if (isVideoScrollableActionBar(self) && TweakEnabled()) {
         _ASCollectionViewCell *likeDislikeCell = [self.subviews firstObject];
         ASDisplayNode *containerNode = [likeDislikeCell node];
         NSString *videoId = getVideoId(containerNode);
@@ -369,7 +369,7 @@ static void getVoteAndModifyButtons(
 
 - (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection {
     %orig;
-    if (isVideoScrollabelActionBar(self) && TweakEnabled()) {
+    if (isVideoScrollableActionBar(self) && TweakEnabled()) {
         if (dislikeRollingNumberNode) {
             YTRollingNumberView *likeView = [likeRollingNumberNode valueForKey:@"_rollingNumberView"];
             [dislikeRollingNumberNode updateCount:dislikeRollingNumberNode.updatedCount color:likeView.color];

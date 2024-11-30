@@ -3,7 +3,6 @@
 #import "Vote.h"
 #import "API.h"
 #import "TweakSettings.h"
-#import "../Return-YouTube-Dislikes/API.h"
 
 NSString *formattedLongNumber(NSNumber *number, NSString *error) {
     return error ?: [NSNumberFormatter localizedStringFromNumber:number numberStyle:NSNumberFormatterDecimalStyle];

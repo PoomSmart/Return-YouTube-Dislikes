@@ -1,4 +1,5 @@
 #import <YouTubeHeader/YTSettingsCell.h>
+#import <YouTubeHeader/YTSettingsGroupData.h>
 #import <YouTubeHeader/YTSettingsSectionItem.h>
 #import <YouTubeHeader/YTSettingsSectionItemManager.h>
 #import <YouTubeHeader/YTSettingsViewController.h>
@@ -24,6 +25,18 @@ NSBundle *RYDBundle() {
     });
     return bundle;
 }
+
+%hook YTSettingsGroupData
+
+- (NSArray <NSNumber *> *)orderedCategories {
+    if (self.type != 1 || class_getClassMethod(objc_getClass("YTSettingsGroupData"), @selector(tweaks)))
+        return %orig;
+    NSMutableArray *mutableCategories = %orig.mutableCopy;
+    [mutableCategories insertObject:@(RYDSection) atIndex:0];
+    return mutableCategories.copy;
+}
+
+%end
 
 %hook YTAppSettingsPresentationData
 
