@@ -1,0 +1,10 @@
+// Settings
+"ENABLED" = "Włączone";
+"ENABLE_VOTE_SUBMIT" = "Włącz przesyłanie głosów";
+"ENABLE_VOTE_SUBMIT_DESC" = "Zezwól na przesyłanie Twojego unikalnego anonimowego identyfikatora oraz danych o polubieniach/niepolubieniach filmów/shortów do %@.";
+"EXACT_LIKE_NUMBER" = "Dokładna liczba polubień";
+"EXACT_DISLIKE_NUMBER" = "Dokładna liczna niepolubień";
+"EXACT_DISLIKE_NUMBER_DESC" = "Wyświetla dokładną liczbę niepolubień. Dla przykładu: %@ jest zamieniane na %@.";
+
+// On app launch
+"WANT_TO_ENABLE" = "Czy chcesz teraz włączyć przesyłanie danych polubień/niepolubień do %@? Możesz to później wyłączyć w Ustawieniach > %@ > %@.";
