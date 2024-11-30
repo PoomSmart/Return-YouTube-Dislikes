@@ -8,9 +8,6 @@
 
 static NSCache <NSString *, NSDictionary *> *cache;
 
-void (*ASNodeContextPush)(ASNodeContext *);
-void (*ASNodeContextPop)(void);
-
 extern NSBundle *RYDBundle();
 
 %hook YTSlimVideoDetailsActionView
@@ -274,16 +271,9 @@ static void getVoteAndModifyButtons(
                     dislikeRollingNumberNode = dislikeNode.yogaChildren[1];
                 else {
                     id elementContext = [likeRollingNumberNode valueForKey:@"_context"];
-                    if (ASNodeContextPush) {
-                        ASNodeContext *context = [(ASNodeContext *)[%c(ASNodeContext) alloc] initWithOptions:1];
-                        ASNodeContextPush(context);
-                        dislikeRollingNumberNode = [[%c(YTRollingNumberNode) alloc] initWithElement:likeRollingNumberNode.element context:elementContext];
-                        ASNodeContextPop();
-                    } else {
-                        overrideNodeCreation = 1;
-                        dislikeRollingNumberNode = [[%c(ELMNodeFactory) sharedInstance] nodeWithElement:likeRollingNumberNode.element materializationContext:&elementContext];
-                        overrideNodeCreation = 0;
-                    }
+                    overrideNodeCreation = 1;
+                    dislikeRollingNumberNode = [[%c(ELMNodeFactory) sharedInstance] nodeWithElement:likeRollingNumberNode.element materializationContext:&elementContext];
+                    overrideNodeCreation = 0;
                     dislikeRollingNumberNode.updatedCount = FETCHING;
                     dislikeRollingNumberNode.updatedCountNumber = @(0);
                     [dislikeRollingNumberNode updateRollingNumberView];
@@ -297,16 +287,9 @@ static void getVoteAndModifyButtons(
                     dislikeTextNode = dislikeNode.yogaChildren[1];
                 else {
                     id elementContext = [likeTextNode valueForKey:@"_context"];
-                    if (ASNodeContextPush) {
-                        ASNodeContext *context = [(ASNodeContext *)[%c(ASNodeContext) alloc] initWithOptions:1];
-                        ASNodeContextPush(context);
-                        dislikeTextNode = [[%c(ELMTextNode) alloc] initWithElement:likeTextNode.element context:elementContext];
-                        ASNodeContextPop();
-                    } else {
-                        overrideNodeCreation = 2;
-                        dislikeTextNode = [[%c(ELMNodeFactory) sharedInstance] nodeWithElement:likeTextNode.element materializationContext:&elementContext];
-                        overrideNodeCreation = 0;
-                    }
+                    overrideNodeCreation = 2;
+                    dislikeTextNode = [[%c(ELMNodeFactory) sharedInstance] nodeWithElement:likeTextNode.element materializationContext:&elementContext];
+                    overrideNodeCreation = 0;
                     mutableDislikeText = [[NSMutableAttributedString alloc] initWithAttributedString:likeTextNode.attributedText];
                     dislikeTextNode.attributedText = mutableDislikeText;
                     [dislikeNode addYogaChild:dislikeTextNode];
@@ -531,9 +514,5 @@ static void getVoteAndModifyButtons(
         bundlePath = [bundlePath stringByAppendingString:@"/Module_Framework"];
     } else
         bundlePath = NSBundle.mainBundle.executablePath;
-    MSImageRef ref = MSGetImageByName([bundlePath UTF8String]);
-    ASNodeContextPush = (void (*)(ASNodeContext *))MSFindSymbol(ref, "_ASNodeContextPush");
-    ASNodeContextPop = (void (*)(void))MSFindSymbol(ref, "_ASNodeContextPop");
-    HBLogDebug(@"RYD: ASNodeContextPush: %p, ASNodeContextPop: %p", ASNodeContextPush, ASNodeContextPop);
     %init;
 }
