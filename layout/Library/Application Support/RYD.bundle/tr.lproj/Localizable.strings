@@ -1,4 +1,6 @@
 // Settings
+"SETTINGS_TITLE" = "Return YouTube Dislike";
+
 "ENABLED" = "Etkinleştir";
 "ENABLE_VOTE_SUBMIT" = "Oy gönderimini etkinleştir";
 "ENABLE_VOTE_SUBMIT_DESC" = "Benzersiz anonim kimliğinin ve video/short beğeni/beğenmeme verilerinin şu adrese gönderilmesine izin ver %@.";

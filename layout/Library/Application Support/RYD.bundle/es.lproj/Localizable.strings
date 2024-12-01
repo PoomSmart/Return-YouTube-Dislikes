@@ -1,4 +1,6 @@
 // Settings
+"SETTINGS_TITLE" = "Return YouTube Dislike";
+
 "ENABLED" = "Habilitado";
 "ENABLE_VOTE_SUBMIT" = "Habilitar la participación de voto";
 "ENABLE_VOTE_SUBMIT_DESC" = "Autoriza que su ID anónimo único y los datos de Me gusta/No me gusta de videos/shorts se envíen a %@.";

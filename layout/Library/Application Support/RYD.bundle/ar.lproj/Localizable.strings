@@ -1,4 +1,6 @@
 // Settings
+"SETTINGS_TITLE" = "Return YouTube Dislike";
+
 "ENABLED" = "مفعَّل";
 "ENABLE_VOTE_SUBMIT" = "تفعيل إرسال التصويت";
 "ENABLE_VOTE_SUBMIT_DESC" = "السماح بإرسال بيانات الإعجاب وعدم الإعجاب عبر معرف فريد ومجهول المصدر (بشكل حافظ للخصوصية) إلى %@.";
