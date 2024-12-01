@@ -1,4 +1,6 @@
 // Settings
+"SETTINGS_TITLE" = "Return YouTube Dislike";
+
 "ENABLED" = "启用";
 "ENABLE_VOTE_SUBMIT" = "上传顶/踩数据";
 "ENABLE_VOTE_SUBMIT_DESC" = "允许将您的唯一匿名ID和顶/踩数据上传至 %@。";

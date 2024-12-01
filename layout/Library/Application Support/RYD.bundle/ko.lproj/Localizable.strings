@@ -1,4 +1,6 @@
 // Settings
+"SETTINGS_TITLE" = "Return YouTube Dislike";
+
 "ENABLED" = "활성화";
 "ENABLE_VOTE_SUBMIT" = "투표 제출 활성화";
 "ENABLE_VOTE_SUBMIT_DESC" = "고유한 익명 ID와 동영상/쇼츠의 좋아요/싫어요 데이터를 %@ 에 제출하도록 허용합니다.";

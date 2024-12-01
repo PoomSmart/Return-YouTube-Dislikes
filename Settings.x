@@ -101,9 +101,9 @@ NSBundle *RYDBundle() {
     if ([delegate respondsToSelector:@selector(setSectionItems:forCategory:title:icon:titleDescription:headerHidden:)]) {
         YTIIcon *icon = [%c(YTIIcon) new];
         icon.iconType = YT_DISLIKE;
-        [delegate setSectionItems:sectionItems forCategory:RYDSection title:@(TWEAK_NAME) icon:icon titleDescription:nil headerHidden:NO];
+        [delegate setSectionItems:sectionItems forCategory:RYDSection title:LOC(@"SETTINGS_TITLE") icon:icon titleDescription:nil headerHidden:NO];
     } else
-        [delegate setSectionItems:sectionItems forCategory:RYDSection title:@(TWEAK_NAME) titleDescription:nil headerHidden:NO];
+        [delegate setSectionItems:sectionItems forCategory:RYDSection title:LOC(@"SETTINGS_TITLE") titleDescription:nil headerHidden:NO];
 }
 
 - (void)updateSectionForCategory:(NSUInteger)category withEntry:(id)entry {

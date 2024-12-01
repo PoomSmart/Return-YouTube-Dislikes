@@ -1,4 +1,6 @@
 // Settings
+"SETTINGS_TITLE" = "Return YouTube Dislike";
+
 "ENABLED" = "Ativado";
 "ENABLE_VOTE_SUBMIT" = "Ativar envio de votos";
 "ENABLE_VOTE_SUBMIT_DESC" = "Permite que seu único ID anônimo e dados de curtidas/não curtidas de vídeos/shorts sejam enviados para %@.";

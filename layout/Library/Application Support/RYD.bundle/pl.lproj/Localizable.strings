@@ -1,4 +1,6 @@
 // Settings
+"SETTINGS_TITLE" = "Przywróć łapki w dół";
+
 "ENABLED" = "Włączone";
 "ENABLE_VOTE_SUBMIT" = "Włącz przesyłanie głosów";
 "ENABLE_VOTE_SUBMIT_DESC" = "Zezwól na przesyłanie Twojego unikalnego anonimowego identyfikatora oraz danych o polubieniach/niepolubieniach filmów/shortów do %@.";

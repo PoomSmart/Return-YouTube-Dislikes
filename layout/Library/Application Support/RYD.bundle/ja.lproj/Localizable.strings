@@ -1,4 +1,6 @@
 // Settings
+"SETTINGS_TITLE" = "Return YouTube Dislike";
+
 "ENABLED" = "有効";
 "ENABLE_VOTE_SUBMIT" = "評価の送信を許可";
 "ENABLE_VOTE_SUBMIT_DESC" = "固有の匿名IDと動画/ショートの高評価/低評価のデータを %@ に送信することを許可します。";

@@ -1,4 +1,6 @@
 // Settings
+"SETTINGS_TITLE" = "Return YouTube Dislike";
+
 "ENABLED" = "Enabled";
 "ENABLE_VOTE_SUBMIT" = "Active l'envoie des votes";
 "ENABLE_VOTE_SUBMIT_DESC" = "Autorise votre identifiant anonyme unique ainsi que vos likes/dislikes sur les vidéos/shorts d'être envoyés à %@.";

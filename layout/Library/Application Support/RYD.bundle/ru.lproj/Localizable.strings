@@ -1,4 +1,6 @@
 // Settings
+"SETTINGS_TITLE" = "Return YouTube Dislike";
+
 "ENABLED" = "Активировать";
 "ENABLE_VOTE_SUBMIT" = "Включить отправку голосов";
 "ENABLE_VOTE_SUBMIT_DESC" = "Разрешает отправку ваших данных о Лайках/Дизлайках в Видео и Shorts под уникальным анонимным идентификатором на сайт %@.";
