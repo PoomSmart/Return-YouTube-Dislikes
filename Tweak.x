@@ -27,9 +27,9 @@ extern NSBundle *RYDBundle();
             getVoteFromVideoWithHandler(cache, meta.target.videoId, maxRetryCount, ^(NSDictionary *data, NSString *error) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if ([renderer slimButton_isDislikeButton])
-                        [self.label setFormattedString:[%c(YTIFormattedString) formattedStringWithString:getNormalizedDislikes(data[@"dislikes"], error)]];
+                        [self.label setFormattedString:[%c(YTIFormattedString) formattedStringWithString:getNormalizedDislikes(getDislikeData(data), error)]];
                     else if ([renderer slimButton_isLikeButton] && error == nil)
-                        [self.label setFormattedString:[%c(YTIFormattedString) formattedStringWithString:formattedLongNumber(data[@"likes"], nil)]];
+                        [self.label setFormattedString:[%c(YTIFormattedString) formattedStringWithString:formattedLongNumber(getLikeData(data), nil)]];
                     [self setNeedsLayout];
                 });
             });
@@ -58,8 +58,8 @@ extern NSBundle *RYDBundle();
     %orig;
     if (changed && (isLikeButton || isDislikeButton)) {
         getVoteFromVideoWithHandler(cache, meta.target.videoId, maxRetryCount, ^(NSDictionary *data, NSString *error) {
-            NSString *defaultText = isDislikeButton ? getNormalizedDislikes(data[@"dislikes"], error) : formattedLongNumber(data[@"likes"], error);
-            NSString *toggledText = isDislikeButton ? getNormalizedDislikes(@([data[@"dislikes"] unsignedIntegerValue] + 1), error) : formattedLongNumber(@([data[@"likes"] unsignedIntegerValue] + 1), error);
+            NSString *defaultText = isDislikeButton ? getNormalizedDislikes(getDislikeData(data), error) : formattedLongNumber(getLikeData(data), error);
+            NSString *toggledText = isDislikeButton ? getNormalizedDislikes(@([getDislikeData(data) unsignedIntegerValue] + 1), error) : formattedLongNumber(@([getLikeData(data) unsignedIntegerValue] + 1), error);
             YTIFormattedString *formattedDefaultText = [%c(YTIFormattedString) formattedStringWithString:defaultText];
             YTIFormattedString *formattedToggledText = [%c(YTIFormattedString) formattedStringWithString:toggledText];
             buttonRenderer.defaultText = formattedDefaultText;
@@ -94,8 +94,8 @@ extern NSBundle *RYDBundle();
     %orig;
     if (isLikeButton || isDislikeButton) {
         getVoteFromVideoWithHandler(cache, meta.target.videoId, maxRetryCount, ^(NSDictionary *data, NSString *error) {
-            NSString *defaultText = isDislikeButton ? getNormalizedDislikes(data[@"dislikes"], error) : formattedLongNumber(data[@"likes"], error);
-            NSString *toggledText = isDislikeButton ? getNormalizedDislikes(@([data[@"dislikes"] unsignedIntegerValue] + 1), error) : formattedLongNumber(@([data[@"likes"] unsignedIntegerValue] + 1), error);
+            NSString *defaultText = isDislikeButton ? getNormalizedDislikes(getDislikeData(data), error) : formattedLongNumber(getLikeData(data), error);
+            NSString *toggledText = isDislikeButton ? getNormalizedDislikes(@([getDislikeData(data) unsignedIntegerValue] + 1), error) : formattedLongNumber(@([getLikeData(data) unsignedIntegerValue] + 1), error);
             YTIFormattedString *formattedDefaultText = [%c(YTIFormattedString) formattedStringWithString:defaultText];
             YTIFormattedString *formattedToggledText = [%c(YTIFormattedString) formattedStringWithString:toggledText];
             buttonRenderer.defaultText = formattedDefaultText;
@@ -120,8 +120,8 @@ extern NSBundle *RYDBundle();
     [dislikeButton setTitle:FETCHING forState:UIControlStateSelected];
     YTLikeStatus likeStatus = renderer.likeStatus;
     getVoteFromVideoWithHandler(cache, renderer.target.videoId, maxRetryCount, ^(NSDictionary *data, NSString *error) {
-        NSString *formattedDislikeCount = getNormalizedDislikes(data[@"dislikes"], error);
-        NSString *formattedToggledDislikeCount = getNormalizedDislikes(@([data[@"dislikes"] unsignedIntegerValue] + 1), error);
+        NSString *formattedDislikeCount = getNormalizedDislikes(getDislikeData(data), error);
+        NSString *formattedToggledDislikeCount = getNormalizedDislikes(@([getDislikeData(data) unsignedIntegerValue] + 1), error);
         YTIFormattedString *formattedText = [%c(YTIFormattedString) formattedStringWithString:formattedDislikeCount];
         YTIFormattedString *formattedToggledText = [%c(YTIFormattedString) formattedStringWithString:formattedToggledDislikeCount];
         if (renderer.hasDislikeCountText)
@@ -141,8 +141,8 @@ extern NSBundle *RYDBundle();
         });
         if (ExactLikeNumber() && error == nil) {
             YTQTMButton *likeButton = self.likeButton;
-            NSString *formattedLikeCount = formattedLongNumber(data[@"likes"], nil);
-            NSString *formattedToggledLikeCount = getNormalizedDislikes(@([data[@"likes"] unsignedIntegerValue] + 1), nil);
+            NSString *formattedLikeCount = formattedLongNumber(getLikeData(data), nil);
+            NSString *formattedToggledLikeCount = getNormalizedDislikes(@([getLikeData(data) unsignedIntegerValue] + 1), nil);
             YTIFormattedString *formattedText = [%c(YTIFormattedString) formattedStringWithString:formattedLikeCount];
             YTIFormattedString *formattedToggledText = [%c(YTIFormattedString) formattedStringWithString:formattedToggledLikeCount];
             if (renderer.hasLikeCountText)
@@ -223,14 +223,14 @@ static void getVoteAndModifyButtons(
         HBLogDebug(@"RYD: Vote data for video %@: %@", videoId, data);
         dispatch_async(dispatch_get_main_queue(), ^{
             if (ExactLikeNumber() && error == nil) {
-                NSNumber *likeNumber = data[@"likes"];
+                NSNumber *likeNumber = getLikeData(data);
                 NSString *likeCount = formattedLongNumber(likeNumber, nil);
                 if (likeCount && likeHandler) {
                     HBLogDebug(@"RYD: Set like count for %@ to %@", videoId, likeCount);
                     likeHandler(likeCount, likeNumber);
                 }
             }
-            NSNumber *dislikeNumber = data[@"dislikes"];
+            NSNumber *dislikeNumber = getDislikeData(data);
             NSString *dislikeCount = getNormalizedDislikes(dislikeNumber, error);
             if (dislikeHandler) {
                 HBLogDebug(@"RYD: Set dislike count for %@ to %@", videoId, dislikeCount);

@@ -7,6 +7,8 @@
 "EXACT_LIKE_NUMBER" = "正確な高評価の数";
 "EXACT_DISLIKE_NUMBER" = "正確な低評価の数";
 "EXACT_DISLIKE_NUMBER_DESC" = "低評価の数を正確に表示します。 例: %@ -> %@";
+"RAW_DATA" = "生の低評価データ";
+"RAW_DATA_DESC" = "RYDブラウザー拡張機能またはこのツイークを使用している人からのみ低評価データを使用します。";
 
 // On app launch
 "WANT_TO_ENABLE" = "高評価/低評価のデータを %@ に送信することを許可しますか？後から設定 > %@ > %@ で無効にすることができます。";

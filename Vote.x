@@ -4,6 +4,15 @@
 #import "API.h"
 #import "TweakSettings.h"
 
+NSNumber *getLikeData(NSDictionary <NSString *, NSNumber *> *data) {
+    // Is it a good idea to return only the likes from the RYD users?
+    return data[@"likes"];
+}
+
+NSNumber *getDislikeData(NSDictionary <NSString *, NSNumber *> *data) {
+    return UseRawData() ? data[@"rawDislikes"] : data[@"dislikes"];
+}
+
 NSString *formattedLongNumber(NSNumber *number, NSString *error) {
     return error ?: [NSNumberFormatter localizedStringFromNumber:number numberStyle:NSNumberFormatterDecimalStyle];
 }

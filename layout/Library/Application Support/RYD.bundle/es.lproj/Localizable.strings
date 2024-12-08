@@ -7,6 +7,8 @@
 "EXACT_LIKE_NUMBER" = "Numeros exactos de likes";
 "EXACT_DISLIKE_NUMBER" = "Numeros exactos de dislikes";
 "EXACT_DISLIKE_NUMBER_DESC" = "Mostrar el número exacto de dislikes. Por ejemplo: %@ -> %@.";
+"RAW_DATA" = "Datos brutos de dislikes";
+"RAW_DATA_DESC" = "Usar solo los datos de dislikes de las personas que usan la extensión del navegador RYD o este ajuste.";
 
 // On app launch
 "WANT_TO_ENABLE" = "¿Quieres habilitar el envío de tus datos de Me gusta/No me gusta a %@ ahora? Puedes deshabilitarlo más tarde en Configuración > %@ > %@.";

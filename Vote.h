@@ -6,6 +6,8 @@
 NSString *formattedLongNumber(NSNumber *number, NSString *error);
 NSString *getNormalizedLikes(NSNumber *likeNumber, NSString *error);
 NSString *getNormalizedDislikes(NSNumber *dislikeNumber, NSString *error);
+NSNumber *getLikeData(NSDictionary <NSString *, NSNumber *> *data);
+NSNumber *getDislikeData(NSDictionary <NSString *, NSNumber *> *data);
 void getVoteFromVideoWithHandler(NSCache <NSString *, NSDictionary *> *cache, NSString *videoId, int retryCount, void (^handler)(NSDictionary *d, NSString *error));
 
 #define maxRetryCount 3
