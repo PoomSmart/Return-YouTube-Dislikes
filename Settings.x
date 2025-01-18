@@ -3,7 +3,11 @@
 #import <YouTubeHeader/YTSettingsSectionItem.h>
 #import <YouTubeHeader/YTSettingsSectionItemManager.h>
 #import <YouTubeHeader/YTSettingsViewController.h>
+#if TARGET_OS_SIMULATOR
+#import <PSHeader/Misc.h>
+#else
 #import <rootless.h>
+#endif
 #import "Settings.h"
 #import "TweakSettings.h"
 
@@ -17,11 +21,12 @@ NSBundle *RYDBundle() {
     static NSBundle *bundle = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
+#if TARGET_OS_SIMULATOR
+        bundle = [NSBundle bundleWithPath:realPath(@"/Library/Application Support/RYD.bundle")];
+#else
         NSString *tweakBundlePath = [[NSBundle mainBundle] pathForResource:@"RYD" ofType:@"bundle"];
-        if (tweakBundlePath)
-            bundle = [NSBundle bundleWithPath:tweakBundlePath];
-        else
-            bundle = [NSBundle bundleWithPath:ROOT_PATH_NS(@"/Library/Application Support/RYD.bundle")];
+        bundle = [NSBundle bundleWithPath:tweakBundlePath ?: ROOT_PATH_NS(@"/Library/Application Support/RYD.bundle")];
+#endif
     });
     return bundle;
 }
