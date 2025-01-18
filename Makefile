@@ -9,7 +9,7 @@ else
 		TARGET = iphone:clang:latest:11.0
 	endif
 endif
-PACKAGE_VERSION = 1.13.1
+PACKAGE_VERSION = 1.13.2
 INSTALL_TARGET_PROCESSES = YouTube
 
 API_URL = "https://returnyoutubedislikeapi.com"

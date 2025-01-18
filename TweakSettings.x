@@ -1,7 +1,9 @@
 #import "TweakSettings.h"
 
 BOOL TweakEnabled() {
-    return [[NSUserDefaults standardUserDefaults] boolForKey:EnabledKey];
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    id value = [defaults objectForKey:EnabledKey];
+    return value ? [value boolValue] : YES;
 }
 
 BOOL VoteSubmissionEnabled() {
