@@ -1,13 +1,9 @@
+#import <PSHeader/Misc.h>
 #import <YouTubeHeader/YTSettingsCell.h>
 #import <YouTubeHeader/YTSettingsGroupData.h>
 #import <YouTubeHeader/YTSettingsSectionItem.h>
 #import <YouTubeHeader/YTSettingsSectionItemManager.h>
 #import <YouTubeHeader/YTSettingsViewController.h>
-#if TARGET_OS_SIMULATOR
-#import <PSHeader/Misc.h>
-#else
-#import <rootless.h>
-#endif
 #import "Settings.h"
 #import "TweakSettings.h"
 
@@ -21,11 +17,11 @@ NSBundle *RYDBundle() {
     static NSBundle *bundle = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-#if TARGET_OS_SIMULATOR
-        bundle = [NSBundle bundleWithPath:realPath(@"/Library/Application Support/RYD.bundle")];
-#else
         NSString *tweakBundlePath = [[NSBundle mainBundle] pathForResource:@"RYD" ofType:@"bundle"];
-        bundle = [NSBundle bundleWithPath:tweakBundlePath ?: ROOT_PATH_NS(@"/Library/Application Support/RYD.bundle")];
+#if TARGET_OS_SIMULATOR
+        bundle = [NSBundle bundleWithPath:tweakBundlePath ?: realPath(@"/Library/Application Support/RYD.bundle")];
+#else
+        bundle = [NSBundle bundleWithPath:tweakBundlePath ?: PS_ROOT_PATH_NS(@"/Library/Application Support/RYD.bundle")];
 #endif
     });
     return bundle;
@@ -115,12 +111,13 @@ NSBundle *RYDBundle() {
         }
         settingItemId:0];
     [sectionItems addObject:rawData];
+    NSString *settingsTitle = LOC(@"SETTINGS_TITLE");
     if ([delegate respondsToSelector:@selector(setSectionItems:forCategory:title:icon:titleDescription:headerHidden:)]) {
         YTIIcon *icon = [%c(YTIIcon) new];
         icon.iconType = YT_DISLIKE;
-        [delegate setSectionItems:sectionItems forCategory:RYDSection title:LOC(@"SETTINGS_TITLE") icon:icon titleDescription:nil headerHidden:NO];
+        [delegate setSectionItems:sectionItems forCategory:RYDSection title:settingsTitle icon:icon titleDescription:nil headerHidden:NO];
     } else
-        [delegate setSectionItems:sectionItems forCategory:RYDSection title:LOC(@"SETTINGS_TITLE") titleDescription:nil headerHidden:NO];
+        [delegate setSectionItems:sectionItems forCategory:RYDSection title:settingsTitle titleDescription:nil headerHidden:NO];
 }
 
 - (void)updateSectionForCategory:(NSUInteger)category withEntry:(id)entry {
