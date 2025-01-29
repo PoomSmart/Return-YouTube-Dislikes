@@ -1,9 +1,10 @@
 #import <HBLog.h>
 #import <UIKit/UIKit.h>
-#import "Settings.h"
-#import "TweakSettings.h"
-#import "Tweak.h"
 #import "API.h"
+#import "Settings.h"
+#import "Shared.h"
+#import "Tweak.h"
+#import "TweakSettings.h"
 #import "Vote.h"
 
 static NSCache <NSString *, NSDictionary *> *cache;

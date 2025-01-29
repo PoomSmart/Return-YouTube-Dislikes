@@ -2,6 +2,7 @@
 #import <YouTubeHeader/YTLikeStatus.h>
 #import <HBLog.h>
 #import "Settings.h"
+#import "Shared.h"
 
 static NSString *getUserID() {
     return [[NSUserDefaults standardUserDefaults] stringForKey:UserIDKey];
@@ -305,7 +306,7 @@ void _sendVote(NSString *videoId, YTLikeStatus s, int retryCount) {
 }
 
 void sendVote(NSString *videoId, YTLikeStatus s) {
-    _sendVote(videoId, s, 3);
+    _sendVote(videoId, s, maxRetryCount);
 }
 
 %ctor {

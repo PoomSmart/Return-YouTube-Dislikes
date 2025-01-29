@@ -1,8 +1,10 @@
+#import <Foundation/NSUserDefaults.h>
+#import <Foundation/NSValue.h>
 #import "TweakSettings.h"
 
 BOOL TweakEnabled() {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    id value = [defaults objectForKey:EnabledKey];
+    NSNumber *value = [defaults objectForKey:EnabledKey];
     return value ? [value boolValue] : YES;
 }
 

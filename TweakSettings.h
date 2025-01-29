@@ -1,7 +1,7 @@
 #ifndef TWEAK_SETTINGS_H_
 #define TWEAK_SETTINGS_H_
 
-#import <Foundation/Foundation.h>
+#import <objc/objc.h>
 
 BOOL TweakEnabled();
 BOOL VoteSubmissionEnabled();

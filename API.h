@@ -1,7 +1,8 @@
 #ifndef API_H_
 #define API_H_
 
-#import <Foundation/Foundation.h>
+#import <Foundation/NSDictionary.h>
+#import <Foundation/NSString.h>
 #import <YouTubeHeader/YTLikeStatus.h>
 
 void fetch(
