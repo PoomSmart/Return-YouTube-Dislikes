@@ -211,7 +211,7 @@ static void registerUser() {
                 @{ @"solution": solution },
                 ^(NSDictionary *data) {
                     if ([data isKindOfClass:[NSNumber class]] && ![(NSNumber *)data boolValue]) {
-                        HBLogInfo(@"%@", @"registerUser() failed");
+                        HBLogDebug(@"%@", @"registerUser() failed");
                         return;
                     }
                     if (!isRegistered()) {

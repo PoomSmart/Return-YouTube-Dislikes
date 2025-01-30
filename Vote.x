@@ -50,7 +50,7 @@ static NSString *formattedShortNumber(int64_t number) {
 
 NSString *getNormalizedNumber(NSNumber *number, BOOL exact, NSString *error) {
     if (!number) {
-        HBLogError(@"RYD: Number is nil, error: %@", error);
+        HBLogDebug(@"RYD: Number is nil, error: %@", error);
         return FAILED;
     }
     if (exact)

@@ -389,7 +389,7 @@ static void getVoteAndModifyButtons(
     id spvc = [self parentResponder];
     NSString *videoId = nil;
     if ([spvc isKindOfClass:%c(YTShortsPlayerViewController)])
-        videoId = [(YTShortsPlayerViewController *)spvc videoId];
+        videoId = [[[(YTShortsPlayerViewController *)spvc currentVideo] singleVideo] videoId];
     else if ([spvc isKindOfClass:%c(YTReelPlayerViewController)]) {
         YTReelModel *model = [spvc valueForKey:@"_model"];
         if ([model respondsToSelector:@selector(onesieVideoID)])
@@ -518,12 +518,6 @@ static void getVoteAndModifyButtons(
             [alertView show];
         });
     }
-    NSString *bundlePath = [NSString stringWithFormat:@"%@/Frameworks/Module_Framework.framework", NSBundle.mainBundle.bundlePath];
-    NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
-    if (bundle) {
-        [bundle load];
-        bundlePath = [bundlePath stringByAppendingString:@"/Module_Framework"];
-    } else
-        bundlePath = NSBundle.mainBundle.executablePath;
+    [[NSBundle bundleWithPath:[NSString stringWithFormat:@"%@/Frameworks/Module_Framework.framework", NSBundle.mainBundle.bundlePath]] load];
     %init;
 }
