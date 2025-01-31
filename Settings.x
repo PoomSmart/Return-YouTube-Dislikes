@@ -18,11 +18,7 @@ NSBundle *RYDBundle() {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSString *tweakBundlePath = [[NSBundle mainBundle] pathForResource:@"RYD" ofType:@"bundle"];
-#if TARGET_OS_SIMULATOR
-        bundle = [NSBundle bundleWithPath:tweakBundlePath ?: realPath(@"/Library/Application Support/RYD.bundle")];
-#else
         bundle = [NSBundle bundleWithPath:tweakBundlePath ?: PS_ROOT_PATH_NS(@"/Library/Application Support/RYD.bundle")];
-#endif
     });
     return bundle;
 }
