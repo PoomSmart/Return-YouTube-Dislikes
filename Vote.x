@@ -10,7 +10,13 @@ NSNumber *getLikeData(NSDictionary <NSString *, NSNumber *> *data) {
 }
 
 NSNumber *getDislikeData(NSDictionary <NSString *, NSNumber *> *data) {
-    return UseRawData() ? data[@"rawDislikes"] : data[@"dislikes"];
+    NSNumber *dislikes = data[@"dislikes"];
+    if (UseRawData()) {
+        NSNumber *rawDislikes = data[@"rawDislikes"];
+        if (rawDislikes != (id)[NSNull null])
+            return rawDislikes;
+    }
+    return dislikes;
 }
 
 NSString *formattedLongNumber(NSNumber *number, NSString *error) {
