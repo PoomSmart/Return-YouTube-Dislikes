@@ -410,6 +410,8 @@ static void getVoteAndModifyButtons(
         } @catch (id ex) {}
     }
     if (elmView == nil) return;
+    if ([elmView isKindOfClass:%c(YTReelWatchActionBarView)])
+        elmView = [elmView valueForKey:@"_actionBarElement"];
     ELMContainerNode *containerNode = [elmView valueForKey:@"_rootNode"];
     ELMContainerNode *likeNode = [containerNode.yogaChildren firstObject];
     ELMContainerNode *dislikeNode = containerNode.yogaChildren[1];
