@@ -29,6 +29,6 @@ setup:: clean all
 	@rm -f /opt/simject/$(TWEAK_NAME).dylib
 	@cp -v $(THEOS_OBJ_DIR)/$(TWEAK_NAME).dylib /opt/simject/$(TWEAK_NAME).dylib
 	@cp -v $(PWD)/$(TWEAK_NAME).plist /opt/simject/$(TWEAK_NAME).plist
-	@mkdir -p "$(PL_SIMULATOR_APPLICATION_SUPPORT_PATH)"
-	@cp -vR "$(PWD)/layout/Library/Application Support/RYD.bundle" "$(PL_SIMULATOR_APPLICATION_SUPPORT_PATH)/"
+	@sudo mkdir -p "$(PL_SIMULATOR_APPLICATION_SUPPORT_PATH)"
+	@sudo cp -vR "$(PWD)/layout/Library/Application Support/RYD.bundle" "$(PL_SIMULATOR_APPLICATION_SUPPORT_PATH)/"
 endif
