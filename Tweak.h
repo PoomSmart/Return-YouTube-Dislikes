@@ -6,6 +6,7 @@
 #import <YouTubeHeader/ELMNodeController.h>
 #import <YouTubeHeader/ELMNodeFactory.h>
 #import <YouTubeHeader/ELMTextNode.h>
+#import <YouTubeHeader/NSArray+YouTube.h>
 #import <YouTubeHeader/UIView+AsyncDisplayKit.h>
 #import <YouTubeHeader/YTAlertView.h>
 #import <YouTubeHeader/YTELMView.h>

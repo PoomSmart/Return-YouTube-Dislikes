@@ -414,7 +414,7 @@ static void getVoteAndModifyButtons(
         elmView = [elmView valueForKey:@"_actionBarElement"];
     ELMContainerNode *containerNode = [elmView valueForKey:@"_rootNode"];
     ELMContainerNode *likeNode = [containerNode.yogaChildren firstObject];
-    ELMContainerNode *dislikeNode = containerNode.yogaChildren.count > 1 ? containerNode.yogaChildren[1] : nil;
+    ELMContainerNode *dislikeNode = [containerNode.yogaChildren yt_objectAtIndexOrNil:1];
     if (dislikeNode == nil) return;
     do {
         likeNode = [likeNode.yogaChildren firstObject];
@@ -428,9 +428,9 @@ static void getVoteAndModifyButtons(
     do {
         dislikeNode = [dislikeNode.yogaChildren firstObject];
     } while (dislikeNode.yogaChildren.count == 1);
-    ELMTextNode *shortLikeTextNode = likeNode.yogaChildren[1];
-    ELMTextNode *shortDislikeTextNode = dislikeNode.yogaChildren[1];
-    if (![shortLikeTextNode isKindOfClass:%c(ELMTextNode)] || ![shortDislikeTextNode isKindOfClass:%c(ELMTextNode)]) {
+    ELMTextNode *shortLikeTextNode = [likeNode.yogaChildren yt_objectAtIndexOrNil:1];
+    ELMTextNode *shortDislikeTextNode = [dislikeNode.yogaChildren yt_objectAtIndexOrNil:1];
+    if (shortLikeTextNode == nil || shortDislikeTextNode == nil || ![shortLikeTextNode isKindOfClass:%c(ELMTextNode)] || ![shortDislikeTextNode isKindOfClass:%c(ELMTextNode)]) {
         HBLogDebug(@"%@", @"RYD: Short like or dislike text node not found");
         return;
     }
