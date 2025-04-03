@@ -414,7 +414,8 @@ static void getVoteAndModifyButtons(
         elmView = [elmView valueForKey:@"_actionBarElement"];
     ELMContainerNode *containerNode = [elmView valueForKey:@"_rootNode"];
     ELMContainerNode *likeNode = [containerNode.yogaChildren firstObject];
-    ELMContainerNode *dislikeNode = containerNode.yogaChildren[1];
+    ELMContainerNode *dislikeNode = containerNode.yogaChildren.count > 1 ? containerNode.yogaChildren[1] : nil;
+    if (dislikeNode == nil) return;
     do {
         likeNode = [likeNode.yogaChildren firstObject];
     } while ([likeNode.accessibilityIdentifier isEqualToString:@"id.reel_like_button"]);
