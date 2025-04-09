@@ -251,6 +251,25 @@ static void getVoteAndModifyButtons(
     });
 }
 
+static YTCommonColorPalette *currentColorPalette() {
+    Class YTPageStyleControllerClass = %c(YTPageStyleController);
+    if (YTPageStyleControllerClass)
+        return [YTPageStyleControllerClass currentColorPalette];
+    YTAppDelegate *delegate = (YTAppDelegate *)[UIApplication sharedApplication].delegate;
+    YTAppViewController *appViewController = [delegate valueForKey:@"_appViewController"];
+    NSInteger pageStyle = [appViewController pageStyle];
+    Class YTCommonColorPaletteClass = %c(YTCommonColorPalette);
+    if (YTCommonColorPaletteClass)
+        return pageStyle == 1 ? [YTCommonColorPaletteClass darkPalette] : [YTCommonColorPaletteClass lightPalette];
+    return [%c(YTColorPalette) colorPaletteForPageStyle:pageStyle];
+}
+
+static void setTextColor(NSMutableAttributedString *text) {
+    if (text == nil) return;
+    UIColor *color = [currentColorPalette() textPrimary];
+    [text addAttribute:NSForegroundColorAttributeName value:color range:NSMakeRange(0, text.length)];
+}
+
 %hook ASCollectionView
 
 - (ELMCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath {
@@ -332,6 +351,7 @@ static void getVoteAndModifyButtons(
                     } else {
                         NSMutableAttributedString *mutableLikeText = [[NSMutableAttributedString alloc] initWithAttributedString:likeTextNode.attributedText];
                         mutableLikeText.mutableString.string = likeCount;
+                        setTextColor(mutableLikeText);
                         likeTextNode.attributedText = mutableLikeText;
                         likeTextNode.accessibilityLabel = likeCount;
                     }
@@ -354,6 +374,7 @@ static void getVoteAndModifyButtons(
                         [dislikeRollingNumberNode relayoutNode];
                     } else {
                         mutableDislikeText.mutableString.string = dislikeString;
+                        setTextColor(mutableDislikeText);
                         dislikeTextNode.attributedText = mutableDislikeText;
                         dislikeTextNode.accessibilityLabel = dislikeCount;
                     }
@@ -392,14 +413,12 @@ static void setTextNodeColor(ELMTextNode *node, UIColor *color) {
 
 - (void)pageStyleDidChange:(NSInteger)pageStyle {
     %orig;
-    @try {
-        if ([self.pageStylingDelegate isKindOfClass:%c(YTWatchNextResultsViewController)]) {
-            YTCommonColorPalette *colorPalette = [%c(YTPageStyleController) currentColorPalette];
-            UIColor *textColor = [colorPalette textPrimary];
-            setTextNodeColor(likeTextNode, textColor);
-            setTextNodeColor(dislikeTextNode, textColor);
-        }
-    } @catch (id ex) {}
+    if ([self.pageStylingDelegate isKindOfClass:%c(YTWatchNextResultsViewController)]) {
+        YTCommonColorPalette *colorPalette = currentColorPalette();
+        UIColor *textColor = [colorPalette textPrimary];
+        setTextNodeColor(likeTextNode, textColor);
+        setTextNodeColor(dislikeTextNode, textColor);
+    }
 }
 
 %end
