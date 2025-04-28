@@ -432,16 +432,8 @@ static void setTextNodeColor(ELMTextNode *node, UIColor *color) {
     if (!TweakEnabled()) return;
     if (self.didGetVote) return;
     id spvc = [self parentResponder];
-    NSString *videoId = nil;
-    if ([spvc isKindOfClass:%c(YTShortsPlayerViewController)])
-        videoId = [[[(YTShortsPlayerViewController *)spvc currentVideo] singleVideo] videoId];
-    else if ([spvc isKindOfClass:%c(YTReelPlayerViewController)]) {
-        YTReelModel *model = [spvc valueForKey:@"_model"];
-        if ([model respondsToSelector:@selector(onesieVideoID)])
-            videoId = model.onesieVideoID;
-        else
-            videoId = model.endpoint.reelWatchEndpoint.videoId;
-    }
+    YTReelModel *model = [spvc valueForKey:@"_model"];
+    NSString *videoId = model.endpoint.reelWatchEndpoint.videoId;
     HBLogDebug(@"RYD: Short ID: %@", videoId);
     if (videoId == nil) return;
     YTELMView *elmView = nil;
