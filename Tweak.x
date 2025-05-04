@@ -433,7 +433,12 @@ static void setTextNodeColor(ELMTextNode *node, UIColor *color) {
     if (self.didGetVote) return;
     id spvc = [self parentResponder];
     YTReelModel *model = [spvc valueForKey:@"_model"];
-    NSString *videoId = model.endpoint.reelWatchEndpoint.videoId;
+    NSString *videoId;
+    @try {
+        videoId = [model endpoint].reelWatchEndpoint.videoId;
+    } @catch (id ex) {
+        videoId = [model command].reelWatchEndpoint.videoId;
+    }
     HBLogDebug(@"RYD: Short ID: %@", videoId);
     if (videoId == nil) return;
     YTELMView *elmView = nil;
