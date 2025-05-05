@@ -438,6 +438,8 @@ static void setTextNodeColor(ELMTextNode *node, UIColor *color) {
         videoId = [model endpoint].reelWatchEndpoint.videoId;
     } @catch (id ex) {
         videoId = [model command].reelWatchEndpoint.videoId;
+        if (videoId.length == 0 && [spvc isKindOfClass:%c(YTShortsPlayerViewController)])
+            videoId = [[[(YTShortsPlayerViewController *)spvc currentVideo] singleVideo] videoId];
     }
     HBLogDebug(@"RYD: Short ID: %@", videoId);
     if (videoId == nil) return;
