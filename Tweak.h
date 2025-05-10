@@ -1,6 +1,7 @@
 #import <YouTubeHeader/_ASCollectionViewCell.h>
 #import <YouTubeHeader/_ASDisplayView.h>
 #import <YouTubeHeader/ASCollectionView.h>
+#import <YouTubeHeader/NSArray+YouTube.h>
 #import <YouTubeHeader/ELMCellNode.h>
 #import <YouTubeHeader/ELMContainerNode.h>
 #import <YouTubeHeader/ELMNodeController.h>
