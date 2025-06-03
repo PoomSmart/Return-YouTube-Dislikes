@@ -459,18 +459,28 @@ static void setTextNodeColor(ELMTextNode *node, UIColor *color) {
     ELMContainerNode *containerNode = [elmView valueForKey:@"_rootNode"];
     ELMContainerNode *likeNode = [containerNode.yogaChildren firstObject];
     ELMContainerNode *dislikeNode = [containerNode.yogaChildren yt_objectAtIndexOrNil:1];
-    do {
-        likeNode = [likeNode.yogaChildren firstObject];
-    } while ([likeNode.accessibilityIdentifier isEqualToString:@"id.reel_like_button"]);
-    do {
-        likeNode = [likeNode.yogaChildren firstObject];
-    } while (likeNode.yogaChildren.count == 1);
-    do {
-        dislikeNode = [dislikeNode.yogaChildren firstObject];
-    } while ([dislikeNode.accessibilityIdentifier isEqualToString:@"id.reel_dislike_button"]);
-    do {
-        dislikeNode = [dislikeNode.yogaChildren firstObject];
-    } while (dislikeNode.yogaChildren.count == 1);
+    BOOL foundLikeButton = NO;
+    BOOL foundDislikeButton = NO;
+    @try {
+        foundLikeButton = [[[[[likeNode controller] owningComponent] owningComponent] templateURI] hasPrefix:@"reel_like_button.eml"];
+        foundDislikeButton = [[[[[dislikeNode controller] owningComponent] owningComponent] templateURI] hasPrefix:@"reel_dislike_button.eml"];
+    } @catch (id ex) {}
+    if (!foundLikeButton) {
+        do {
+            likeNode = [likeNode.yogaChildren firstObject];
+        } while ([likeNode.accessibilityIdentifier isEqualToString:@"id.reel_like_button"]);
+        do {
+            likeNode = [likeNode.yogaChildren firstObject];
+        } while (likeNode.yogaChildren.count == 1);
+    }
+    if (!foundDislikeButton) {
+        do {
+            dislikeNode = [dislikeNode.yogaChildren firstObject];
+        } while ([dislikeNode.accessibilityIdentifier isEqualToString:@"id.reel_dislike_button"]);
+        do {
+            dislikeNode = [dislikeNode.yogaChildren firstObject];
+        } while (dislikeNode.yogaChildren.count == 1);
+    }
     ELMTextNode *shortLikeTextNode = [likeNode.yogaChildren yt_objectAtIndexOrNil:1];
     ELMTextNode *shortDislikeTextNode = [dislikeNode.yogaChildren yt_objectAtIndexOrNil:1];
     if (shortLikeTextNode == nil || shortDislikeTextNode == nil || ![shortLikeTextNode isKindOfClass:%c(ELMTextNode)] || ![shortDislikeTextNode isKindOfClass:%c(ELMTextNode)]) {
