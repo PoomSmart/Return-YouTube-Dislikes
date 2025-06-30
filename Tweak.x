@@ -11,106 +11,6 @@ static NSCache <NSString *, NSDictionary *> *cache;
 
 extern NSBundle *RYDBundle();
 
-%hook YTSlimVideoDetailsActionView
-
-+ (YTSlimVideoDetailsActionView *)actionViewWithSlimMetadataButtonSupportedRenderer:(YTISlimMetadataButtonSupportedRenderers *)renderer withElementsContextBlock:(id)block {
-    if ([renderer rendererOneOfCase] == 153515154 && TweakEnabled())
-        return [[%c(YTSlimVideoDetailsActionView) alloc] initWithSlimMetadataButtonSupportedRenderer:renderer];
-    return %orig;
-}
-
-- (id)initWithSlimMetadataButtonSupportedRenderer:(id)arg1 {
-    self = %orig;
-    if (self && TweakEnabled()) {
-        YTISlimMetadataButtonSupportedRenderers *renderer = [self valueForKey:@"_supportedRenderer"];
-        if (((ExactLikeNumber() || UseRYDLikeData()) && [renderer slimButton_isLikeButton]) || [renderer slimButton_isDislikeButton]) {
-            YTISlimMetadataToggleButtonRenderer *meta = renderer.slimMetadataToggleButtonRenderer;
-            getVoteFromVideoWithHandler(cache, meta.target.videoId, maxRetryCount, ^(NSDictionary *data, NSString *error) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    if ([renderer slimButton_isDislikeButton])
-                        [self.label setFormattedString:[%c(YTIFormattedString) formattedStringWithString:getNormalizedDislikes(getDislikeData(data), error)]];
-                    else if ([renderer slimButton_isLikeButton] && error == nil)
-                        [self.label setFormattedString:[%c(YTIFormattedString) formattedStringWithString:getNormalizedLikes(getLikeData(data), nil)]];
-                    [self setNeedsLayout];
-                });
-            });
-        }
-    }
-    return self;
-}
-
-- (void)setToggled:(BOOL)toggled {
-    if (!TweakEnabled()) {
-        %orig;
-        return;
-    }
-    YTISlimMetadataButtonSupportedRenderers *renderer = [self valueForKey:@"_supportedRenderer"];
-    BOOL isLikeButton = (ExactLikeNumber() || UseRYDLikeData()) && [renderer slimButton_isLikeButton];
-    BOOL isDislikeButton = [renderer slimButton_isDislikeButton];
-    YTISlimMetadataToggleButtonRenderer *meta = renderer.slimMetadataToggleButtonRenderer;
-    YTIToggleButtonRenderer *buttonRenderer = meta.button.toggleButtonRenderer;
-    BOOL changed = NO;
-    if (isLikeButton || isDislikeButton) {
-        changed = self.toggled != toggled;
-        YTIFormattedString *formattedText = [%c(YTIFormattedString) formattedStringWithString:FETCHING];
-        buttonRenderer.defaultText = formattedText;
-        buttonRenderer.toggledText = formattedText;
-    }
-    %orig;
-    if (changed && (isLikeButton || isDislikeButton)) {
-        getVoteFromVideoWithHandler(cache, meta.target.videoId, maxRetryCount, ^(NSDictionary *data, NSString *error) {
-            NSString *defaultText = isDislikeButton ? getNormalizedDislikes(getDislikeData(data), error) : getNormalizedLikes(getLikeData(data), error);
-            NSString *toggledText = isDislikeButton ? getNormalizedDislikes(@([getDislikeData(data) unsignedIntegerValue] + 1), error) : getNormalizedLikes(@([getLikeData(data) unsignedIntegerValue] + 1), error);
-            YTIFormattedString *formattedDefaultText = [%c(YTIFormattedString) formattedStringWithString:defaultText];
-            YTIFormattedString *formattedToggledText = [%c(YTIFormattedString) formattedStringWithString:toggledText];
-            buttonRenderer.defaultText = formattedDefaultText;
-            buttonRenderer.toggledText = formattedToggledText;
-            if ([self isKindOfClass:%c(YTSlimVideoDetailsActionView)]) {
-                [self.label setFormattedString:toggled ? formattedToggledText : formattedDefaultText];
-                [self setNeedsLayout];
-            }
-        });
-    }
-}
-
-%end
-
-%hook YTFullscreenEngagementActionBarButtonView
-
-- (void)updateButtonAndLabelForToggled:(BOOL)toggled {
-    if (!TweakEnabled()) {
-        %orig;
-        return;
-    }
-    YTFullscreenEngagementActionBarButtonRenderer *renderer = [self valueForKey:@"_buttonRenderer"];
-    BOOL isLikeButton = (ExactLikeNumber() || UseRYDLikeData()) && [renderer isLikeButton];
-    BOOL isDislikeButton = [renderer isDislikeButton];
-    YTISlimMetadataToggleButtonRenderer *meta = [renderer valueForKey:@"_toggleButtonRenderer"];
-    YTIToggleButtonRenderer *buttonRenderer = meta.button.toggleButtonRenderer;
-    if (isLikeButton || isDislikeButton) {
-        YTIFormattedString *formattedText = [%c(YTIFormattedString) formattedStringWithString:FETCHING];
-        buttonRenderer.defaultText = formattedText;
-        buttonRenderer.toggledText = formattedText;
-    }
-    %orig;
-    if (isLikeButton || isDislikeButton) {
-        getVoteFromVideoWithHandler(cache, meta.target.videoId, maxRetryCount, ^(NSDictionary *data, NSString *error) {
-            NSString *defaultText = isDislikeButton ? getNormalizedDislikes(getDislikeData(data), error) : getNormalizedLikes(getLikeData(data), error);
-            NSString *toggledText = isDislikeButton ? getNormalizedDislikes(@([getDislikeData(data) unsignedIntegerValue] + 1), error) : getNormalizedLikes(@([getLikeData(data) unsignedIntegerValue] + 1), error);
-            YTIFormattedString *formattedDefaultText = [%c(YTIFormattedString) formattedStringWithString:defaultText];
-            YTIFormattedString *formattedToggledText = [%c(YTIFormattedString) formattedStringWithString:toggledText];
-            buttonRenderer.defaultText = formattedDefaultText;
-            buttonRenderer.toggledText = formattedToggledText;
-            if ([self isKindOfClass:%c(YTFullscreenEngagementActionBarButtonView)]) {
-                [self.label setFormattedString:toggled ? formattedToggledText : formattedDefaultText];
-                [self setNeedsLayout];
-            }
-        });
-    }
-}
-
-%end
-
 %hook YTReelWatchLikesController
 
 - (void)updateLikeButtonWithRenderer:(YTILikeButtonRenderer *)renderer {
@@ -169,15 +69,15 @@ extern NSBundle *RYDBundle();
 
 %hook YTLikeService
 
-- (void)makeRequestWithStatus:(YTLikeStatus)likeStatus target:(YTILikeTarget *)target clickTrackingParams:(id)arg3 requestParams:(id)arg4 responseBlock:(id)arg5 errorBlock:(id)arg6 {
+- (void)notifyVideoLikeStatus:(YTLikeStatus)likeStatus withID:(NSString *)videoId {
     if (TweakEnabled() && VoteSubmissionEnabled())
-        sendVote(target.videoId, likeStatus);
+        sendVote(videoId, likeStatus);
     %orig;
 }
 
-- (void)makeRequestWithStatus:(YTLikeStatus)likeStatus target:(YTILikeTarget *)target clickTrackingParams:(id)arg3 queueContextParams:(id)arg4 requestParams:(id)arg5 responseBlock:(id)arg6 errorBlock:(id)arg7 {
+- (void)notifyPlaylistLikeStatus:(YTLikeStatus)likeStatus withID:(NSString *)playlistId {
     if (TweakEnabled() && VoteSubmissionEnabled())
-        sendVote(target.videoId, likeStatus);
+        sendVote(playlistId, likeStatus);
     %orig;
 }
 
@@ -185,9 +85,15 @@ extern NSBundle *RYDBundle();
 
 %hook YTLikeServiceImpl
 
-- (void)makeRequestWithStatus:(YTLikeStatus)likeStatus target:(YTILikeTarget *)target clickTrackingParams:(id)arg3 queueContextParams:(id)arg4 requestParams:(id)arg5 responseBlock:(id)arg6 errorBlock:(id)arg7 {
+- (void)notifyVideoLikeStatus:(YTLikeStatus)likeStatus withID:(NSString *)videoId {
     if (TweakEnabled() && VoteSubmissionEnabled())
-        sendVote(target.videoId, likeStatus);
+        sendVote(videoId, likeStatus);
+    %orig;
+}
+
+- (void)notifyPlaylistLikeStatus:(YTLikeStatus)likeStatus withID:(NSString *)playlistId {
+    if (TweakEnabled() && VoteSubmissionEnabled())
+        sendVote(playlistId, likeStatus);
     %orig;
 }
 
@@ -462,9 +368,15 @@ static void setTextNodeColor(ELMTextNode *node, UIColor *color) {
     BOOL foundLikeButton = NO;
     BOOL foundDislikeButton = NO;
     @try {
-        foundLikeButton = [[[[[likeNode controller] owningComponent] owningComponent] templateURI] hasPrefix:@"reel_like_button.eml"];
-        foundDislikeButton = [[[[[dislikeNode controller] owningComponent] owningComponent] templateURI] hasPrefix:@"reel_dislike_button.eml"];
-    } @catch (id ex) {}
+        ELMComponent *likeOwningComponent = [[likeNode controller] owningComponent];
+        if ([likeOwningComponent owningComponent]) likeOwningComponent = [likeOwningComponent owningComponent];
+        foundLikeButton = [[likeOwningComponent templateURI] hasPrefix:@"reel_like_button.eml"];
+        ELMComponent *dislikeOwningComponent = [[dislikeNode controller] owningComponent];
+        if ([dislikeOwningComponent owningComponent]) dislikeOwningComponent = [dislikeOwningComponent owningComponent];
+        foundDislikeButton = [[dislikeOwningComponent templateURI] hasPrefix:@"reel_dislike_button.eml"];
+    } @catch (id ex) {
+        HBLogDebug(@"RYD: Error checking if like/dislike button is found: %@", ex);
+    }
     if (!foundLikeButton) {
         do {
             likeNode = [likeNode.yogaChildren firstObject];
@@ -481,10 +393,14 @@ static void setTextNodeColor(ELMTextNode *node, UIColor *color) {
             dislikeNode = [dislikeNode.yogaChildren firstObject];
         } while (dislikeNode.yogaChildren.count == 1);
     }
-    ELMTextNode *shortLikeTextNode = [likeNode.yogaChildren yt_objectAtIndexOrNil:1];
-    ELMTextNode *shortDislikeTextNode = [dislikeNode.yogaChildren yt_objectAtIndexOrNil:1];
+    NSArray *likeChildren = likeNode.yogaChildren;
+    if (likeChildren.count == 1) likeChildren = ((ASDisplayNode *)[likeNode.yogaChildren firstObject]).yogaChildren;
+    ELMTextNode *shortLikeTextNode = [likeChildren yt_objectAtIndexOrNil:1];
+    NSArray *dislikeChildren = dislikeNode.yogaChildren;
+    if (dislikeChildren.count == 1) dislikeChildren = ((ASDisplayNode *)[dislikeNode.yogaChildren firstObject]).yogaChildren;
+    ELMTextNode *shortDislikeTextNode = [dislikeChildren yt_objectAtIndexOrNil:1];
     if (shortLikeTextNode == nil || shortDislikeTextNode == nil || ![shortLikeTextNode isKindOfClass:%c(ELMTextNode)] || ![shortDislikeTextNode isKindOfClass:%c(ELMTextNode)]) {
-        HBLogDebug(@"%@", @"RYD: Short like or dislike text node not found");
+        HBLogDebug(@"RYD: Short like or dislike text node not found");
         return;
     }
     __block NSMutableAttributedString *shortMutableDislikeText = [[NSMutableAttributedString alloc] initWithAttributedString:shortLikeTextNode.attributedText];

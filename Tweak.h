@@ -19,7 +19,6 @@
 #import <YouTubeHeader/YTIButtonSupportedRenderers.h>
 #import <YouTubeHeader/YTIFormattedString.h>
 #import <YouTubeHeader/YTILikeButtonRenderer.h>
-#import <YouTubeHeader/YTISlimMetadataButtonSupportedRenderers.h>
 #import <YouTubeHeader/YTIToggleButtonRenderer.h>
 #import <YouTubeHeader/YTPageStyleController.h>
 #import <YouTubeHeader/YTPlayerViewController.h>
@@ -31,7 +30,6 @@
 #import <YouTubeHeader/YTRollingNumberNode.h>
 #import <YouTubeHeader/YTRollingNumberView.h>
 #import <YouTubeHeader/YTShortsPlayerViewController.h>
-#import <YouTubeHeader/YTSlimVideoDetailsActionView.h>
 #import <YouTubeHeader/YTWatchController.h>
 
 @interface YTRollingNumberNode (RYD)
