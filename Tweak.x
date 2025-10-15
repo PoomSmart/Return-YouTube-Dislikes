@@ -359,10 +359,24 @@ static void setTextNodeColor(ELMTextNode *node, UIColor *color) {
             elmView = [view valueForKey:@"_elementView"];
         } @catch (id ex) {}
     }
+    BOOL isNested = NO;
+    if (elmView == nil) {
+        @try {
+            YTReelElementAsyncComponentView *playerOverlayView = [self valueForKey:@"_playerOverlayView"];
+            elmView = [playerOverlayView valueForKey:@"_elementView"];
+            isNested = YES;
+        } @catch (id ex) {}
+    }
     if (elmView == nil) return;
     if ([elmView isKindOfClass:%c(YTReelWatchActionBarView)])
         elmView = [elmView valueForKey:@"_actionBarElement"];
-    ELMContainerNode *containerNode = [elmView valueForKey:@"_rootNode"];
+    ELMContainerNode *containerNode;
+    if (isNested) {
+        ELMContainerNode *node = [elmView valueForKey:@"_rootNode"];
+        node = [node.yogaChildren firstObject];
+        containerNode = [node.yogaChildren yt_objectAtIndexOrNil:1];
+    } else
+        containerNode = [elmView valueForKey:@"_rootNode"];
     ELMContainerNode *likeNode = [containerNode.yogaChildren firstObject];
     ELMContainerNode *dislikeNode = [containerNode.yogaChildren yt_objectAtIndexOrNil:1];
     BOOL foundLikeButton = NO;
