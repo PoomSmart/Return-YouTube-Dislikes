@@ -329,12 +329,7 @@ static void setTextNodeColor(ELMTextNode *node, UIColor *color) {
 
 %end
 
-%hook YTReelWatchPlaybackOverlayView
-
-%property (assign, nonatomic) BOOL didGetVote;
-
-- (void)layoutActionBar {
-    %orig;
+static void layoutActionBar(YTReelWatchPlaybackOverlayView *self) {
     if (!TweakEnabled()) return;
     if (self.didGetVote) return;
     id spvc = [self parentResponder];
@@ -436,6 +431,26 @@ static void setTextNodeColor(ELMTextNode *node, UIColor *color) {
         }
     );
     self.didGetVote = YES;
+}
+
+%hook YTReelWatchPlaybackOverlayView
+
+%property (assign, nonatomic) BOOL didGetVote;
+
+- (void)layoutActionBar {
+    %orig;
+    layoutActionBar(self);
+}
+
+%end
+
+%hook YTReelWatchPlaybackOverlayViewSub
+
+%property (assign, nonatomic) BOOL didGetVote;
+
+- (void)layoutActionBar {
+    %orig;
+    layoutActionBar((YTReelWatchPlaybackOverlayView *)self);
 }
 
 %end
