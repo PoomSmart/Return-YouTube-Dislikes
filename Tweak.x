@@ -379,10 +379,10 @@ static void layoutActionBar(YTReelWatchPlaybackOverlayView *self) {
     @try {
         ELMComponent *likeOwningComponent = [[likeNode controller] owningComponent];
         if ([likeOwningComponent owningComponent]) likeOwningComponent = [likeOwningComponent owningComponent];
-        foundLikeButton = [[likeOwningComponent templateURI] hasPrefix:@"reel_like_button.eml"];
+        foundLikeButton = [[likeOwningComponent templateURI] hasPrefix:@"reel_like_button"];
         ELMComponent *dislikeOwningComponent = [[dislikeNode controller] owningComponent];
         if ([dislikeOwningComponent owningComponent]) dislikeOwningComponent = [dislikeOwningComponent owningComponent];
-        foundDislikeButton = [[dislikeOwningComponent templateURI] hasPrefix:@"reel_dislike_button.eml"];
+        foundDislikeButton = [[dislikeOwningComponent templateURI] hasPrefix:@"reel_dislike_button"];
     } @catch (id ex) {
         HBLogDebug(@"RYD: Error checking if like/dislike button is found: %@", ex);
     }

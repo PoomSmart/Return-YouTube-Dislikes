@@ -1,3 +1,4 @@
+#import <Foundation/Foundation.h>
 #import <HBLog.h>
 #import "unicode/unum.h"
 #import "Vote.h"
@@ -38,7 +39,10 @@ static NSString *formattedShortNumber(int64_t number) {
     status = U_ZERO_ERROR;
     NSString *currentLocale = [[[NSLocale preferredLanguages] firstObject] stringByReplacingOccurrencesOfString:@"-" withString:@"_"];
     UNumberFormat *formatter = unum_open(UNUM_DECIMAL_COMPACT_SHORT, NULL, 0, [currentLocale UTF8String], NULL, &status);
-    assert(!U_FAILURE(status));
+    if (U_FAILURE(status)) {
+        HBLogDebug(@"RYD: Error creating number formatter: %s", u_errorName(status));
+        return nil;
+    }
     status = U_ZERO_ERROR;
     int32_t used = unum_formatInt64(formatter, number, NULL, 0, NULL, &status);
     NSString *resultString = nil;
