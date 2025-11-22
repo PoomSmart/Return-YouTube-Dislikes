@@ -181,22 +181,26 @@ static void setTextColor(NSMutableAttributedString *text) {
 - (ELMCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath {
     ELMCellNode *node = %orig;
     if (isVideoScrollableActionBar(self) && TweakEnabled()) {
-        _ASCollectionViewCell *likeDislikeCell = [self.subviews firstObject];
-        ASDisplayNode *containerNode = [likeDislikeCell node];
-        NSString *videoId = getVideoId(containerNode);
-        if (videoId == nil) return node;
         int pairMode = -1;
         BOOL isDislikeButtonModified = NO;
+        ASDisplayNode *containerNode = node;
+        ELMContainerNode *likeNode;
+        
+        if (![containerNode isKindOfClass:%c(ELMCellNode)]) return node;
+        
         do {
             containerNode = [containerNode.yogaChildren firstObject];
             if (containerNode.yogaChildren.count == 2)
                 containerNode = containerNode.yogaChildren[1];
         } while (containerNode.yogaChildren.count == 1);
-        ELMContainerNode *likeNode = [containerNode.yogaChildren firstObject];
+        
+        likeNode = [containerNode.yogaChildren firstObject];
         if (![likeNode.accessibilityIdentifier isEqualToString:@"id.video.like.button"]) {
             HBLogDebug(@"RYD: Like button not found, instead found %@", likeNode.accessibilityIdentifier);
             return node;
         }
+        NSString *videoId = getVideoId(containerNode);
+        if (videoId == nil) return node;
         if (likeNode.yogaChildren.count == 2) {
             ELMContainerNode *dislikeNode = [containerNode.yogaChildren lastObject];
             isDislikeButtonModified = dislikeNode.yogaChildren.count == 2;
