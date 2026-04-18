@@ -33,7 +33,6 @@ static NSString *getXPointYFormat(NSString *count, char c) {
 }
 
 // https://gist.github.com/danpashin/5951706a6aa25748a7faa1acd5c1db8b
-API_AVAILABLE(ios(13))
 static NSString *formattedShortNumber(int64_t number) {
     UErrorCode status;
     status = U_ZERO_ERROR;
@@ -69,7 +68,8 @@ NSString *getNormalizedNumber(NSNumber *number, BOOL exact, NSString *error) {
     NSUInteger digits = count.length;
     if (digits <= 3) // 0 - 999
         return count;
-    if (@available(iOS 13.0, *))
+    NSOperatingSystemVersion ios13 = {13, 0, 0};
+    if ([[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:ios13])
         return formattedShortNumber([number unsignedIntegerValue]);
     if (digits == 4) // 1000 - 9999
         return getXPointYFormat(count, 'K');
